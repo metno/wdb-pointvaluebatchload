@@ -27,7 +27,7 @@
  */
 
 #include "CopyJob.h"
-#include <iostream>
+#include <wdbLogHandler.h>
 
 namespace fastload
 {
@@ -80,7 +80,7 @@ void CopyJob::performQueries(PGconn * connection)
 		if ( ++ count  % (1024 * 2) == 0 )
 		{
 			endCopy(connection);
-			std::cout << "count = " << count << std::endl;
+			//std::cout << "count = " << count << std::endl;
 			beginCopy(connection);
 		}
 		copyRow(connection, data);
@@ -99,7 +99,8 @@ void CopyJob::performQueries(PGconn * connection)
 		}
 		catch ( std::exception & e )
 		{
-			std::clog << e.what() << std::endl;
+			WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.job" );
+			log.warn(e.what());
 			// ...and continue...
 		}
 	}

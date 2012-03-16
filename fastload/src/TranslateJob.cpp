@@ -28,6 +28,7 @@
 
 #include "TranslateJob.h"
 #include "InputData.h"
+#include <wdbLogHandler.h>
 #include <pqxx/pqxx>
 #include <boost/algorithm/string.hpp>
 #include <vector>
@@ -76,7 +77,8 @@ void TranslateJob::run()
 		}
 		catch ( std::exception & e )
 		{
-			std::clog << "Error when generating data: " << e.what() << std::endl;
+			WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.job.translate" );
+			log.warnStream() << "Error when generating data: " << e.what() << " (from " << input << ")";
 			// and continue as if nothing has happened...
 		}
 	}

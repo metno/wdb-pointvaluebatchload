@@ -27,15 +27,15 @@
  */
 
 #include "DataQue.h"
-#include <iostream>
+#include <wdbLogHandler.h>
 
 namespace fastload
 {
 
-DataQue::DataQue(unsigned maxQueSize, bool trackOperations) :
+DataQue::DataQue(unsigned maxQueSize, const std::string & queName) :
 		done_(false),
 		maxQueSize_(maxQueSize),
-		trackOperations_(trackOperations),
+		queName_(queName),
 		inserts_(0),
 		extracts_(0)
 {
@@ -47,22 +47,21 @@ DataQue::~DataQue()
 
 bool DataQue::get(DataQue::Data & out)
 {
+	WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.DataQue.get." + queName_ );
+
 	boost::unique_lock<boost::mutex> lock(mutex_);
 
-	if ( trackOperations_ )
-		std::cout << "get size: " << que_.size() << " (total: " << extracts_ << ")" << std::endl;
+	log.debugStream() << "size: " << que_.size() << " (total: " << extracts_ << ")";
 
 	while ( que_.empty() )
 	{
 		if ( done_ )
 			return false;
-		if ( trackOperations_ )
-			std::cout << "get waiting" << std::endl;
+		log.debugStream() << "get waiting";
 
 		condition_.wait(mutex_);
 
-		if ( trackOperations_ )
-			std::cout << "get done waiting" << std::endl;
+			log.debugStream() << "get done waiting";
 	}
 
 	out = que_.front();
@@ -78,23 +77,22 @@ bool DataQue::get(DataQue::Data & out)
 
 void DataQue::put(const DataQue::Data & element)
 {
+	WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.DataQue.put" + queName_ );
+
 	boost::unique_lock<boost::mutex> lock(mutex_);
 
 	if ( maxQueSize_ and que_.size() >= maxQueSize_ )
 	{
-		if ( trackOperations_ )
-			std::cout << "put waiting (" << que_.size() << ")" << std::endl;
+		log.debugStream() << "waiting (" << que_.size() << ")";
 
 		condition_.wait(mutex_);
 
-		if ( trackOperations_ )
-			std::cout << "put done waiting" << std::endl;
+		log.debugStream() << "put done waiting";
 	}
 
 	que_.push_back(element);
 
-	if ( trackOperations_ )
-		std::cout << "put size: " << que_.size() << std::endl;
+	log.debugStream() << "Size: " << que_.size();
 
 	++ inserts_;
 

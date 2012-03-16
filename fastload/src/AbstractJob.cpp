@@ -27,6 +27,7 @@
  */
 
 #include "AbstractJob.h"
+#include <wdbLogHandler.h>
 #include <iostream>
 
 namespace fastload
@@ -54,7 +55,8 @@ void AbstractJob::operator () ()
 	}
 	catch ( std::exception & e )
 	{
-		std::clog << "Unable to keep running thread: " << e.what() << std::endl;
+		WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.job" );
+		log.errorStream() << "Unable to keep running thread: " << e.what();
 		runInformation_->status = Error;
 		runInformation_->errorMessage = e.what();
 	}

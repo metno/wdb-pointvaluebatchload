@@ -30,6 +30,7 @@
 #include "CopyJob.h"
 #include "TranslateJob.h"
 #include "Configuration.h"
+#include <wdbLogHandler.h>
 #include <boost/thread/thread.hpp>
 #include <boost/program_options.hpp>
 #include <iostream>
@@ -42,7 +43,8 @@ void checkForErrors(const fastload::AbstractJob & job)
 {
 	if ( job.status() == fastload::AbstractJob::Error )
 	{
-		std::clog << job.errorMessage() << std::endl;
+		WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.job" );
+		log.error(job.errorMessage());
 		exit(1);
 	}
 }
@@ -83,9 +85,12 @@ int main(int argc, char ** argv)
 		exit(0);
 	}
 
+	wdb::WdbLogHandler logHandler( configuration.logging().loglevel, configuration.logging().logfile );
+	WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.main" );
+	log.debug( "Starting fastload" );
 
-	fastload::DataQue::Ptr rawQue(new fastload::DataQue(50000, false));
-	fastload::DataQue::Ptr translatedQue(new fastload::DataQue(1000, false));
+	fastload::DataQue::Ptr rawQue(new fastload::DataQue(50000, "raw"));
+	fastload::DataQue::Ptr translatedQue(new fastload::DataQue(1000, "translated"));
 
 	fastload::TranslateJob translateJob(configuration.database().pqDatabaseConnection(), configuration.nameSpace, rawQue, translatedQue);
 	boost::thread translateThread(translateJob);
@@ -104,7 +109,7 @@ int main(int argc, char ** argv)
 			std::ifstream s(it->c_str());
 			if ( ! s.good() )
 			{
-				std::clog << "Error when opening file " << * it << std::endl;
+				log.errorStream() << "Unable to open file " << * it;
 				exit(1);
 			}
 			copyData(s, * rawQue);
@@ -118,5 +123,5 @@ int main(int argc, char ** argv)
 	copyThread.join();
 	checkForErrors(copyJob);
 
-	std::cout << "COPY " << translatedQue->callsToGet() << std::endl;
+	log.infoStream() << "COPY " << translatedQue->callsToGet();
 }

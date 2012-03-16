@@ -42,7 +42,7 @@ namespace fastload
 class DataQue : boost::noncopyable
 {
 public:
-	DataQue(unsigned maxQueSize = 500000, bool trackOperations = false);
+	explicit DataQue(unsigned maxQueSize = 500000, const std::string & queName = std::string());
 	~DataQue();
 
 	typedef boost::shared_ptr<DataQue> Ptr;
@@ -71,8 +71,8 @@ private:
 	boost::condition condition_;
 
 	unsigned maxQueSize_;
+	std::string queName_;
 
-	bool trackOperations_;
 	unsigned inserts_;
 	unsigned extracts_;
 };
