@@ -56,6 +56,15 @@ getWciBegin( Configuration & out )
 	("namespace", value( & out.nameSpace), "use the given wdb namespaces");
 	return wciBegin;
 }
+
+options_description
+getErrorHandling( Configuration & out )
+{
+	options_description errorHandling("Error handling");
+	errorHandling.add_options()
+			("all-or-nothing", bool_switch(& out.allOrNothing), "Do not load any data if one row fails to load");
+	return errorHandling;
+}
 }
 
 
@@ -63,6 +72,8 @@ Configuration::Configuration()
 {
 	shownOptions().add(getWciBegin( * this ) );
 	cmdOptions().add(getWciBegin( * this ) );
+	shownOptions().add(getErrorHandling( * this ) );
+	cmdOptions().add(getErrorHandling( * this ) );
 	cmdOptions().add( getInput( * this ) );
 	positionalOptions_.add( "name", -1 );
 }

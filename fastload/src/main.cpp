@@ -92,10 +92,10 @@ int main(int argc, char ** argv)
 	fastload::DataQue::Ptr rawQue(new fastload::DataQue(50000, "raw"));
 	fastload::DataQue::Ptr translatedQue(new fastload::DataQue(1000, "translated"));
 
-	fastload::TranslateJob translateJob(configuration.database().pqDatabaseConnection(), configuration.nameSpace, rawQue, translatedQue);
+	fastload::TranslateJob translateJob(configuration.database().pqDatabaseConnection(), configuration.nameSpace, rawQue, translatedQue, configuration.allOrNothing);
 	boost::thread translateThread(translateJob);
 
-	fastload::CopyJob copyJob(configuration.database().pqDatabaseConnection(), translatedQue);
+	fastload::CopyJob copyJob(configuration.database().pqDatabaseConnection(), translatedQue, configuration.allOrNothing);
 	boost::thread copyThread(copyJob);
 
 	if ( configuration.file.empty() )
@@ -117,11 +117,14 @@ int main(int argc, char ** argv)
 	}
 	rawQue->done();
 
-	translateThread.join();
-	checkForErrors(translateJob);
-
-	copyThread.join();
-	checkForErrors(copyJob);
+	const boost::posix_time::time_duration duration(0,0,1);
+	while ( true )
+	{
+		if ( translateThread.timed_join(duration) )
+			checkForErrors(translateJob);
+		if ( copyThread.timed_join(duration) )
+			checkForErrors(copyJob);
+	}
 
 	log.infoStream() << "COPY " << translatedQue->callsToGet();
 }

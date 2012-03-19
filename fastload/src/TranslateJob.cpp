@@ -37,9 +37,10 @@
 namespace fastload
 {
 
-TranslateJob::TranslateJob(const std::string & pqConnectString, const std::string & nameSpace, DataQue::Ptr readQue, DataQue::Ptr writeQue) :
+TranslateJob::TranslateJob(const std::string & pqConnectString, const std::string & nameSpace, DataQue::Ptr readQue, DataQue::Ptr writeQue, bool failOnSingleError) :
 		AbstractJob(writeQue),
 		readQue_(readQue),
+		failOnSingleError_(failOnSingleError),
 		pqConnectString_(pqConnectString),
 		nameSpace_(nameSpace)
 {
@@ -77,6 +78,9 @@ void TranslateJob::run()
 		}
 		catch ( std::exception & e )
 		{
+			if ( failOnSingleError_ )
+				throw;
+
 			WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.job.translate" );
 			log.warnStream() << "Error when generating data: " << e.what() << " (from " << input << ")";
 			// and continue as if nothing has happened...

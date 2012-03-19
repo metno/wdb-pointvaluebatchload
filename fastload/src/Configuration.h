@@ -43,8 +43,8 @@ public:
 	~Configuration();
 
 	std::vector<std::string> file;
-
 	std::string nameSpace;
+	bool allOrNothing;
 
 private:
 	virtual void parse_( int argc, char ** argv );

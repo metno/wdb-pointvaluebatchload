@@ -32,8 +32,9 @@
 namespace fastload
 {
 
-CopyJob::CopyJob(const std::string & pqConnectString, DataQue::Ptr que) :
-		AbstractDatabaseJob(pqConnectString, que)
+CopyJob::CopyJob(const std::string & pqConnectString, DataQue::Ptr que, bool failOnSingleError) :
+		AbstractDatabaseJob(pqConnectString, que),
+		failOnSingleError_(failOnSingleError)
 {
 }
 
@@ -99,6 +100,9 @@ void CopyJob::performQueries(PGconn * connection)
 		}
 		catch ( std::exception & e )
 		{
+			if ( failOnSingleError_ )
+				throw;
+
 			WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.job" );
 			log.warn(e.what());
 			// ...and continue...
