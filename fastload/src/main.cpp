@@ -131,12 +131,11 @@ int main(int argc, char ** argv)
 	rawQue->done();
 
 	const boost::posix_time::time_duration duration(0,0,1);
-	while ( true )
+	while ( translateJob.status() <= fastload::AbstractJob::Running or copyJob.status() <= fastload::AbstractJob::Running )
 	{
-		if ( translateThread.timed_join(duration) )
-			checkForErrors(translateJob);
-		if ( copyThread.timed_join(duration) )
-			checkForErrors(copyJob);
+		checkForErrors(translateJob);
+		checkForErrors(copyJob);
+		boost::this_thread::sleep(duration);
 	}
 
 	log.infoStream() << "COPY " << translatedQue->callsToGet();
