@@ -48,6 +48,8 @@ protected:
 private:
 	std::string translate(const std::string & what, const std::string & dataprovider, pqxx::work & transaction);
 
+	std::string updateDataprovider_(const std::string & dataproviderSpec, pqxx::work & transaction);
+
 	long long dataproviderid_(const std::string & dataprovidername, pqxx::work & transaction);
 	long long placeid_(const std::string & placename, pqxx::work & transaction);
 	int valueparameterid_(const std::string & parametername, pqxx::work & transaction);

@@ -53,7 +53,7 @@ getWciBegin( Configuration & out )
 {
 	options_description wciBegin( "wci" );
 	wciBegin.add_options()
-	("namespace", value( & out.nameSpace), "use the given wdb namespaces");
+	("namespace", value( & out.nameSpace), "Use the given wdb namespaces, instead of what is specified in the given file(s)");
 	return wciBegin;
 }
 

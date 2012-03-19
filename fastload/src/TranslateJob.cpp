@@ -54,8 +54,6 @@ void TranslateJob::run()
 {
 	pqxx::connection connection(pqConnectString_);
 	pqxx::work transaction(connection);
-	transaction.exec("SELECT wci.begin('locationforecast', " + transaction.esc(nameSpace_) + ")");
-
 
 	std::string dataprovider;
 	std::string input;
@@ -65,14 +63,12 @@ void TranslateJob::run()
 		{
 			boost::trim(input);
 
-			//std::cout << '<' << input << '>' << std::endl;
-
 			if ( input.empty() )
 				dataprovider = std::string();
 			else if ( input[0] == '#' )
 				continue;
 			else if ( dataprovider.empty() )
-				dataprovider = input;
+				dataprovider = updateDataprovider_(input, transaction);
 			else
 				que_->put(translate(input, dataprovider, transaction));
 		}
@@ -115,6 +111,27 @@ std::string TranslateJob::translate(const std::string & what, const std::string 
 			now_(transaction) << '\n';
 
 	return s.str();
+}
+
+std::string TranslateJob::updateDataprovider_(const std::string & dataproviderSpec, pqxx::work & transaction)
+{
+	std::vector<std::string> elements;
+	boost::split(elements, dataproviderSpec, boost::is_any_of("\t"));
+
+	if ( elements.size() > 2 or elements.empty() )
+		throw std::runtime_error("Invalid spec for dataprovider: " + dataproviderSpec);
+
+	const std::string dataprovider = elements[0];
+
+	if ( elements.size() == 2 or not nameSpace_.empty() )
+	{
+		std::string ns = nameSpace_.empty() ? elements[1] : nameSpace_;
+		transaction.exec("SELECT wci.begin('" + transaction.esc(dataprovider) + "', " + transaction.esc(ns) + ")");
+	}
+	else // if ( elements.size() == 1 )
+		transaction.exec("SELECT wci.begin('" + transaction.esc(dataprovider) + "')");
+
+	return dataprovider;
 }
 
 long long TranslateJob::dataproviderid_(const std::string & dataprovidername, pqxx::work & transaction)
