@@ -25,3 +25,4 @@ wdb_fastload_LDADD = $(wdb_LIBS) $(BOOST_THREAD_LIB) $(BOOST_PROGRAM_OPTIONS_LIB
 
 EXTRA_DIST = example/example.dat
 
+include mk/debian.mk

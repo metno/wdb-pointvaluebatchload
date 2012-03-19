@@ -1,0 +1,23 @@
+wdb-fastload (0.4-1) lucid; urgency=low
+
+  * completely new code
+
+ -- Vegard Bones <vegard.bones@met.no>  Mon, 19 Mar 2012 15:53:11 +0100
+
+wdb-fastload (0.3-1) lucid; urgency=low
+
+  * New release, with dataversion
+
+ -- Vegard Bones <vegard.bones@met.no>  Thu, 08 Mar 2012 09:07:55 +0100
+
+wdb-fastload (0.2-1) lucid; urgency=low
+
+  * New release
+
+ -- Vegard Bønes <vegardb@wdb-dev3.met.no>  Mon, 20 Feb 2012 11:56:56 +0000
+
+wdb-fastload (0.1-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Vegard Bones <vegard.bones@met.no>  Tue, 14 Feb 2012 11:07:32 +0100
