@@ -57,6 +57,19 @@ void help(std::ostream & s, const wdb::WdbConfiguration & configuration)
 {
 	version(s);
 	s << '\n';
+	s << "Load point data into a wdb database.\n";
+	s << '\n';
+	s << "This program is meant for (relatively) fast loading of large amounts of data.\n"
+			"This is done by reading input from stdin. The format for this is described\n"
+			"below.\n";
+	s << '\n';
+	s << "Normally, if errors are encountered, the program will merely log a warning and\n"
+			"attempt to continue as if nothing has happened. This behavior may be\n"
+			"altered by using the --all-or-nothing command-line switch, which will cause\n"
+			"any error to be fatal, and revert all loading that has been done so far.\n";
+	s << '\n';
+	fastload::Configuration::printFormatHelp(s);
+	s << '\n';
 	s << configuration.shownOptions() << std::endl;
 }
 

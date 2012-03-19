@@ -82,6 +82,51 @@ Configuration::~Configuration()
 {
 }
 
+std::ostream & Configuration::printFormatHelp(std::ostream & s)
+{
+	s <<			"Input format for loading point data into wdb\n"
+					"\n"
+					"When loading data, you need to follow the format described here:\n"
+					"\n"
+					"All files consists of sections, starting with a data provider name on\n"
+					"one line, optionally followed by a tab character and a three-part namespace\n"
+					"specification. Data listings should follow on the next lines, with no blank\n"
+					"lines between data elements.\n"
+					"\n"
+					"The \"current\" data provider is reset after a blank line has been\n"
+					"encountered. The next line is then expected to contain the name of the\n"
+					"next data provider to use.\n"
+					"\n"
+					"The data listings follow the same pattern as the wci.write function\n"
+					"call parameters, with a few exceptions: It should contain instructions\n"
+					"for inserting a single tuple on each line. The elements on each line\n"
+					"should not contain any quotation marks. Also, the separator between\n"
+					"fields should be a single tab character.\n"
+					"\n"
+					"Here is the ordering of elements in the data list:\n"
+					"\n"
+					"  * value \n"
+					"  * place name \n"
+					"  * reference time \n"
+					"  * valid from \n"
+					"  * valid to\n"
+					"  * value parameter name\n"
+					"  * level parameter name\n"
+					"  * level from\n"
+					"  * level to\n"
+					"  \n"
+					"Optionally, you may also add the following entries (they will be 0 if \n"
+					"not given):\n"
+					"\n"
+					"  * dataversion\n"
+					"  * maxdataversion\n"
+					"  \n"
+					"Note that for all times, it is neccessary to explicitly specify tile zone. \n"
+					"Otherwise you may experience some problems with loading.\n";
+
+	return s;
+}
+
 
 void
 Configuration::parse_( int argc, char ** argv )

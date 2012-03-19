@@ -31,6 +31,7 @@
 
 #include <wdbConfiguration.h>
 #include <boost/program_options/positional_options.hpp>
+#include <iosfwd>
 
 
 namespace fastload
@@ -45,6 +46,8 @@ public:
 	std::vector<std::string> file;
 	std::string nameSpace;
 	bool allOrNothing;
+
+	static std::ostream & printFormatHelp(std::ostream & stream);
 
 private:
 	virtual void parse_( int argc, char ** argv );
