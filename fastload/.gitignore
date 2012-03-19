@@ -1,0 +1,15 @@
+.cproject
+.project
+*.in
+aclocal.m4
+autom4te.cache/
+build/
+compile
+config.guess
+config.sub
+configure
+depcomp
+install-sh
+missing
+*~
+
