@@ -2,7 +2,7 @@ Source: wdb-fastload
 Section: science
 Priority: extra
 Maintainer: Vegard Bones <vegard.bones@met.no>
-Build-Depends: cdbs, debhelper (>= 7), help2man, wdb (>= 1.2.0), libboost-dev (>= 1.40), libboost-thread-dev (>= 1.40), libboost-program-options-dev (>= 1.40), libpqxx-dev (>= 2.6.9)
+Build-Depends: cdbs, debhelper (>= 7), help2man, wdb (>= 1.2.0~rc5), libboost-dev (>= 1.40), libboost-thread-dev (>= 1.40), libboost-program-options-dev (>= 1.40), libpqxx-dev (>= 2.6.9)
 XS-Python-Version: >= 2.6
 Standards-Version: 3.9.1
 
