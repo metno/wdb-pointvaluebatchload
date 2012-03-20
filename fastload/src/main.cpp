@@ -51,7 +51,7 @@ void checkForErrors(const fastload::AbstractJob & job)
 
 void version(std::ostream & s)
 {
-	s << "fastload (0.1.0)" << std::endl;
+	s << PACKAGE_STRING << std::endl;
 }
 void help(std::ostream & s, const wdb::WdbConfiguration & configuration)
 {
