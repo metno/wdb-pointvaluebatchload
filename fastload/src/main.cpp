@@ -105,7 +105,7 @@ int main(int argc, char ** argv)
 	fastload::DataQue::Ptr rawQue(new fastload::DataQue(50000, "raw"));
 	fastload::DataQue::Ptr translatedQue(new fastload::DataQue(1000, "translated"));
 
-	fastload::TranslateJob translateJob(configuration.database().pqDatabaseConnection(), configuration.nameSpace, rawQue, translatedQue, configuration.allOrNothing);
+	fastload::TranslateJob translateJob(configuration.database().pqDatabaseConnection(), configuration.database().user, configuration.nameSpace, rawQue, translatedQue, configuration.allOrNothing);
 	boost::thread translateThread(translateJob);
 
 	fastload::CopyJob copyJob(configuration.database().pqDatabaseConnection(), translatedQue, configuration.allOrNothing);

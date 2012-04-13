@@ -39,7 +39,7 @@ namespace fastload
 class TranslateJob : public AbstractJob
 {
 public:
-	TranslateJob(const std::string & pqConnectString, const std::string & nameSpace, DataQue::Ptr readQue, DataQue::Ptr writeQue, bool failOnSingleError);
+	TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQue::Ptr readQue, DataQue::Ptr writeQue, bool failOnSingleError);
 	virtual ~TranslateJob();
 
 protected:
@@ -59,6 +59,7 @@ private:
 	DataQue::Ptr readQue_;
 	bool failOnSingleError_;
 	std::string pqConnectString_;
+	std::string wciUser_;
 	std::string nameSpace_;
 
 	std::map<std::string, long long> dataproviders_;

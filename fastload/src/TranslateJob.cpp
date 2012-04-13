@@ -37,11 +37,12 @@
 namespace fastload
 {
 
-TranslateJob::TranslateJob(const std::string & pqConnectString, const std::string & nameSpace, DataQue::Ptr readQue, DataQue::Ptr writeQue, bool failOnSingleError) :
+TranslateJob::TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQue::Ptr readQue, DataQue::Ptr writeQue, bool failOnSingleError) :
 		AbstractJob(writeQue),
 		readQue_(readQue),
 		failOnSingleError_(failOnSingleError),
 		pqConnectString_(pqConnectString),
+		wciUser_(wciUser),
 		nameSpace_(nameSpace)
 {
 }
@@ -126,10 +127,10 @@ std::string TranslateJob::updateDataprovider_(const std::string & dataproviderSp
 	if ( elements.size() == 2 or not nameSpace_.empty() )
 	{
 		std::string ns = nameSpace_.empty() ? elements[1] : nameSpace_;
-		transaction.exec("SELECT wci.begin('" + transaction.esc(dataprovider) + "', " + transaction.esc(ns) + ")");
+		transaction.exec("SELECT wci.begin('" + transaction.esc(wciUser_) + "', " + transaction.esc(ns) + ")");
 	}
 	else // if ( elements.size() == 1 )
-		transaction.exec("SELECT wci.begin('" + transaction.esc(dataprovider) + "')");
+		transaction.exec("SELECT wci.begin('" + transaction.esc(wciUser_) + "')");
 
 	return dataprovider;
 }
