@@ -10,8 +10,8 @@ Build-Depends: cdbs,
  libboost-dev (>= 1.40),
  libboost-thread-dev (>= 1.40),
  libboost-program-options-dev (>= 1.40),
- libpqxx3-dev (>= 3.0.0), 
- XS-Python-Version: >= 2.6
+ libpqxx3-dev (>= 3.0.0)
+XS-Python-Version: >= 2.6
 Standards-Version: 3.9.1
 
 
