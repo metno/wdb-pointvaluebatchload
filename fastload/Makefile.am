@@ -20,7 +20,7 @@ wdb_fastload_SOURCES = \
 	src/TranslateJob.h
 
 wdb_fastload_CPPFLAGS = $(wdb_CFLAGS)
-wdb_fastload_LDADD = $(wdb_LIBS) $(BOOST_THREAD_LIB) $(BOOST_PROGRAM_OPTIONS_LIB)
+wdb_fastload_LDADD = $(wdb_LIBS) $(BOOST_THREAD_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) -lpq
 
 
 EXTRA_DIST = example/example.dat
