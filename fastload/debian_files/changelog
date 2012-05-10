@@ -1,3 +1,9 @@
+wdb-fastload (0.5-1) lucid; urgency=low
+
+  * improved error handling
+
+ -- Vegard Bønes <vegardb@wdb-dev3.met.no>  Thu, 10 May 2012 07:01:42 +0000
+
 wdb-fastload (0.4-1) lucid; urgency=low
 
   * completely new code

@@ -131,7 +131,7 @@ int main(int argc, char ** argv)
 	rawQue->done();
 
 	const boost::posix_time::time_duration duration(0,0,1);
-	while ( translateJob.status() <= fastload::AbstractJob::Running or copyJob.status() <= fastload::AbstractJob::Running )
+	while ( translateJob.status() != fastload::AbstractJob::Done or copyJob.status() != fastload::AbstractJob::Done )
 	{
 		checkForErrors(translateJob);
 		checkForErrors(copyJob);
