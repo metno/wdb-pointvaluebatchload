@@ -55,10 +55,9 @@ void AbstractJob::operator () ()
 	}
 	catch ( std::exception & e )
 	{
-		WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.job" );
-		log.errorStream() << "Unable to keep running thread: " << e.what();
 		runInformation_->status = Error;
 		runInformation_->errorMessage = e.what();
+		que_->shutdown();
 	}
 }
 

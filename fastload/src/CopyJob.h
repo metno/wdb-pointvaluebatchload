@@ -37,7 +37,7 @@ namespace fastload
 class CopyJob : public AbstractDatabaseJob
 {
 public:
-	CopyJob(const std::string & pqConnectString, DataQue::Ptr que, bool failOnSingleError);
+	CopyJob(const std::string & pqConnectString, DataQue::Ptr que);
 	~CopyJob();
 
 protected:
@@ -47,8 +47,6 @@ private:
 	void beginCopy(PGconn * connection);
 	void copyRow(PGconn * connection, const std::string & row);
 	void endCopy(PGconn * connection);
-
-	bool failOnSingleError_;
 };
 
 }

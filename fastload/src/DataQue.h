@@ -54,6 +54,8 @@ public:
 
 	void done();
 
+	void shutdown();
+
 	unsigned callsToPut() const
 	{
 		return inserts_;
@@ -64,9 +66,20 @@ public:
 		return extracts_;
 	}
 
+	enum Status
+	{
+		Ready, Done, Shutdown
+	};
+	Status status() const
+	{
+		return status_;
+	}
+
 private:
+
 	std::deque<Data> que_;
-	bool done_;
+	Status status_;
+
 	boost::mutex mutex_;
 	boost::condition condition_;
 

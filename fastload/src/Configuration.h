@@ -45,7 +45,7 @@ public:
 
 	std::vector<std::string> file;
 	std::string nameSpace;
-	bool allOrNothing;
+	//bool allOrNothing;
 
 	static std::ostream & printFormatHelp(std::ostream & stream);
 

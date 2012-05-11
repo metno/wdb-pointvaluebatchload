@@ -44,7 +44,7 @@ void checkForErrors(const fastload::AbstractJob & job)
 	if ( job.status() == fastload::AbstractJob::Error )
 	{
 		WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.job" );
-		log.error(job.errorMessage());
+		log.fatal(job.errorMessage());
 		exit(1);
 	}
 }
@@ -105,30 +105,42 @@ int main(int argc, char ** argv)
 	fastload::DataQue::Ptr rawQue(new fastload::DataQue(50000, "raw"));
 	fastload::DataQue::Ptr translatedQue(new fastload::DataQue(1000, "translated"));
 
-	fastload::TranslateJob translateJob(configuration.database().pqDatabaseConnection(), configuration.database().user, configuration.nameSpace, rawQue, translatedQue, configuration.allOrNothing);
+	fastload::TranslateJob translateJob(configuration.database().pqDatabaseConnection(), configuration.database().user, configuration.nameSpace, rawQue, translatedQue);
 	boost::thread translateThread(translateJob);
 
-	fastload::CopyJob copyJob(configuration.database().pqDatabaseConnection(), translatedQue, configuration.allOrNothing);
+	fastload::CopyJob copyJob(configuration.database().pqDatabaseConnection(), translatedQue);
 	boost::thread copyThread(copyJob);
 
-	if ( configuration.file.empty() )
-		configuration.file.push_back("-");
-	for ( std::vector<std::string>::const_iterator it = configuration.file.begin(); it != configuration.file.end(); ++ it )
+	try
 	{
-		if ( * it == "-" )
-			copyData(std::cin, * rawQue);
-		else
+		if ( configuration.file.empty() )
+			configuration.file.push_back("-");
+		for ( std::vector<std::string>::const_iterator it = configuration.file.begin(); it != configuration.file.end(); ++ it )
 		{
-			std::ifstream s(it->c_str());
-			if ( ! s.good() )
+			if ( * it == "-" )
+				copyData(std::cin, * rawQue);
+			else
 			{
-				log.errorStream() << "Unable to open file " << * it;
-				exit(1);
+				std::ifstream s(it->c_str());
+				if ( ! s.good() )
+				{
+					log.fatalStream() << "Unable to open file " << * it;
+					exit(1);
+				}
+				copyData(s, * rawQue);
 			}
-			copyData(s, * rawQue);
 		}
+		rawQue->done();
 	}
-	rawQue->done();
+	catch ( std::exception & e )
+	{
+		// improved error logging
+		checkForErrors(translateJob);
+		checkForErrors(copyJob);
+
+		log.fatal(e.what());
+		return 1;
+	}
 
 	const boost::posix_time::time_duration duration(0,0,1);
 	while ( translateJob.status() != fastload::AbstractJob::Done or copyJob.status() != fastload::AbstractJob::Done )
