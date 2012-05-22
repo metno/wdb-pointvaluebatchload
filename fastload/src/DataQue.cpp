@@ -27,7 +27,7 @@
  */
 
 #include "DataQue.h"
-#include <wdbLogHandler.h>
+#include <log4cpp/Category.hh>
 
 namespace fastload
 {
@@ -47,7 +47,7 @@ DataQue::~DataQue()
 
 bool DataQue::get(DataQue::Data & out)
 {
-	WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.DataQue.get." + queName_ );
+	log4cpp::Category & log = log4cpp::Category::getInstance( "wdb.fastload.DataQue.get." + queName_ );
 
 	boost::unique_lock<boost::mutex> lock(mutex_);
 
@@ -83,7 +83,7 @@ bool DataQue::get(DataQue::Data & out)
 
 void DataQue::put(const DataQue::Data & element)
 {
-	WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.DataQue.put" + queName_ );
+	log4cpp::Category & log = log4cpp::Category::getInstance( "wdb.fastload.DataQue.put" + queName_ );
 
 	boost::unique_lock<boost::mutex> lock(mutex_);
 
@@ -111,7 +111,7 @@ void DataQue::done()
 
 void DataQue::shutdown()
 {
-	WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.DataQue." + queName_ );
+	log4cpp::Category & log = log4cpp::Category::getInstance( "wdb.fastload.DataQue." + queName_ );
 	log.warn("shutdown");
 
 	status_ = Shutdown;

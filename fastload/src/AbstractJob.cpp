@@ -27,7 +27,6 @@
  */
 
 #include "AbstractJob.h"
-#include <wdbLogHandler.h>
 #include <iostream>
 
 namespace fastload

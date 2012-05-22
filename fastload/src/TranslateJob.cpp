@@ -28,7 +28,6 @@
 
 #include "TranslateJob.h"
 #include "InputData.h"
-#include <wdbLogHandler.h>
 #include <pqxx/pqxx>
 #include <boost/algorithm/string.hpp>
 #include <vector>

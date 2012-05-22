@@ -29,30 +29,48 @@
 #ifndef CONFIGURATION_H_
 #define CONFIGURATION_H_
 
-#include <wdbConfiguration.h>
-#include <boost/program_options/positional_options.hpp>
+#include <log4cpp/Priority.hh>
+#include <boost/program_options/options_description.hpp>
 #include <iosfwd>
 
 
 namespace fastload
 {
 
-class Configuration : public wdb::WdbConfiguration
+class Configuration
 {
 public:
-	Configuration();
+	Configuration(int argc, char ** argv);
 	~Configuration();
 
-	std::vector<std::string> file;
-	std::string nameSpace;
-	//bool allOrNothing;
+	const std::vector<std::string> & file() const { return file_; }
 
-	static std::ostream & printFormatHelp(std::ostream & stream);
+	std::string pqConnect() const;
+	const std::string & wciUser() const { return user_; }
+	const std::string & nameSpace() const { return nameSpace_; }
+
+	const std::string & logFile() const { return logFile_; }
+	log4cpp::Priority::Value logLevel() const;
+
+	std::ostream & printVersion(std::ostream & stream);
+	std::ostream & printHelp(std::ostream & stream);
+	std::ostream & printFormatHelp(std::ostream & stream);
 
 private:
-	virtual void parse_( int argc, char ** argv );
+	boost::program_options::options_description shownOptions_();
+	void parseOptions_(int argc, char ** argv);
 
-	boost::program_options::positional_options_description positionalOptions_;
+	std::vector<std::string> file_;
+
+	std::string database_;
+	std::string host_;
+	int port_;
+	std::string user_;
+
+	std::string nameSpace_;
+
+	std::string logFile_;
+	int logLevel_;
 };
 
 } /* namespace fastload */

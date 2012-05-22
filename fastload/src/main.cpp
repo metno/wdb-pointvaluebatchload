@@ -30,9 +30,16 @@
 #include "CopyJob.h"
 #include "TranslateJob.h"
 #include "Configuration.h"
-#include <wdbLogHandler.h>
+
+#include <log4cpp/Appender.hh>
+#include <log4cpp/Category.hh>
+#include <log4cpp/CategoryStream.hh>
+#include <log4cpp/RollingFileAppender.hh>
+#include <log4cpp/OstreamAppender.hh>
+
 #include <boost/thread/thread.hpp>
 #include <boost/program_options.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <iostream>
 #include <fstream>
 
@@ -43,34 +50,10 @@ void checkForErrors(const fastload::AbstractJob & job)
 {
 	if ( job.status() == fastload::AbstractJob::Error )
 	{
-		WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.job" );
+		log4cpp::Category & log = log4cpp::Category::getInstance( "wdb.fastload.job" );
 		log.fatal(job.errorMessage());
 		exit(1);
 	}
-}
-
-void version(std::ostream & s)
-{
-	s << PACKAGE_STRING << std::endl;
-}
-void help(std::ostream & s, const wdb::WdbConfiguration & configuration)
-{
-	version(s);
-	s << '\n';
-	s << "Load point data into a wdb database.\n";
-	s << '\n';
-	s << "This program is meant for (relatively) fast loading of large amounts of data.\n"
-			"This is done by reading input from stdin. The format for this is described\n"
-			"below.\n";
-	s << '\n';
-	s << "Normally, if errors are encountered, the program will merely log a warning and\n"
-			"attempt to continue as if nothing has happened. This behavior may be\n"
-			"altered by using the --all-or-nothing command-line switch, which will cause\n"
-			"any error to be fatal, and revert all loading that has been done so far.\n";
-	s << '\n';
-	fastload::Configuration::printFormatHelp(s);
-	s << '\n';
-	s << configuration.shownOptions() << std::endl;
 }
 
 void copyData(std::istream & source, fastload::DataQue & sink)
@@ -79,43 +62,39 @@ void copyData(std::istream & source, fastload::DataQue & sink)
 	while ( std::getline(source, line) )
 		sink.put(line);
 }
+
+log4cpp::Appender * getLogAppender(const fastload::Configuration & configuration)
+{
+	const std::string & fileName = configuration.logFile();
+	if ( fileName.empty() ) // log to stdout
+		return new log4cpp::OstreamAppender( "TheLogger", & std::clog );
+
+	return new log4cpp::RollingFileAppender( "TheLogger", fileName, 1024 * 1024, 10 );
+}
 }
 
 
 int main(int argc, char ** argv)
 {
-	fastload::Configuration configuration;
-	configuration.parse(argc, argv);
+	fastload::Configuration configuration(argc, argv);
 
-	if ( configuration.general().help )
-	{
-		help(std::cout, configuration);
-		exit(0);
-	}
-	if ( configuration.general().version )
-	{
-		version(std::cout);
-		exit(0);
-	}
-
-	wdb::WdbLogHandler logHandler( configuration.logging().loglevel, configuration.logging().logfile );
-	WDB_LOG & log = WDB_LOG::getInstance( "wdb.fastload.main" );
-	log.debug( "Starting fastload" );
+	boost::scoped_ptr<log4cpp::Appender> appender(getLogAppender(configuration));
+	log4cpp::Category & log = log4cpp::Category::getInstance("wdb");
+	log.addAppender(appender.get());
+	log.setPriority(configuration.logLevel());
 
 	fastload::DataQue::Ptr rawQue(new fastload::DataQue(50000, "raw"));
 	fastload::DataQue::Ptr translatedQue(new fastload::DataQue(1000, "translated"));
 
-	fastload::TranslateJob translateJob(configuration.database().pqDatabaseConnection(), configuration.database().user, configuration.nameSpace, rawQue, translatedQue);
+	fastload::TranslateJob translateJob(configuration.pqConnect(), configuration.wciUser(), configuration.nameSpace(), rawQue, translatedQue);
 	boost::thread translateThread(translateJob);
 
-	fastload::CopyJob copyJob(configuration.database().pqDatabaseConnection(), translatedQue);
+	fastload::CopyJob copyJob(configuration.pqConnect(), translatedQue);
 	boost::thread copyThread(copyJob);
 
 	try
 	{
-		if ( configuration.file.empty() )
-			configuration.file.push_back("-");
-		for ( std::vector<std::string>::const_iterator it = configuration.file.begin(); it != configuration.file.end(); ++ it )
+		for ( std::vector<std::string>::const_iterator it = configuration.file().begin(); it != configuration.file().end(); ++ it )
 		{
 			if ( * it == "-" )
 				copyData(std::cin, * rawQue);
