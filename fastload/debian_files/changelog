@@ -1,3 +1,15 @@
+wdb-fastload (0.7.0-1) lucid; urgency=low
+
+  * new version
+
+ -- Vegard Bønes <vegardb@wdb-dev3.met.no>  Tue, 22 May 2012 14:26:37 +0200
+
+wdb-fastload (0.6.1-2) lucid; urgency=low
+
+  * dependency update
+
+ -- Vegard Bønes <vegardb@wdb-dev3.met.no>  Tue, 22 May 2012 14:07:52 +0200
+
 wdb-fastload (0.6.1-1) lucid; urgency=low
 
   * new version
