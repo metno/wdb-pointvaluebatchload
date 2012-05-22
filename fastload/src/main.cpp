@@ -78,9 +78,9 @@ int main(int argc, char ** argv)
 {
 	fastload::Configuration configuration(argc, argv);
 
-	boost::scoped_ptr<log4cpp::Appender> appender(getLogAppender(configuration));
+	log4cpp::Appender * appender(getLogAppender(configuration));
 	log4cpp::Category & log = log4cpp::Category::getInstance("wdb");
-	log.addAppender(appender.get());
+	log.addAppender(appender);
 	log.setPriority(configuration.logLevel());
 
 	fastload::DataQue::Ptr rawQue(new fastload::DataQue(50000, "raw"));
