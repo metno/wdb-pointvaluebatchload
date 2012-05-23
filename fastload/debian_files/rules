@@ -5,7 +5,3 @@ include /usr/share/cdbs/1/class/autotools.mk
 
 
 # Add here any variable or target overrides you need.
-
-install/wdb-fastload::
-	mkdir -p debian/wdb-fastload/usr/share/man/man1
-	help2man -N -n"Fast bulk loading of data into a wdb database" "debian/wdb-fastload/usr/bin/wdb-fastload" > debian/wdb-fastload/usr/share/man/man1/wdb-fastload.1
