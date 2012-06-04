@@ -29,7 +29,7 @@
 #ifndef ABSTRACTJOB_H_
 #define ABSTRACTJOB_H_
 
-#include "DataQue.h"
+#include "DataQueue.h"
 #include <boost/shared_ptr.hpp>
 #include <string>
 
@@ -40,7 +40,7 @@ namespace fastload
 class AbstractJob
 {
 public:
-	AbstractJob(DataQue::Ptr que);
+	AbstractJob(DataQueue::Ptr queue);
 	virtual ~AbstractJob();
 
 	virtual void operator () ();
@@ -55,7 +55,7 @@ public:
 protected:
 	virtual void run() =0;
 
-	DataQue::Ptr que_;
+	DataQueue::Ptr queue_;
 
 private:
 	struct RunInformation

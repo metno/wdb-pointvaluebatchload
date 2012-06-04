@@ -41,7 +41,7 @@ namespace old
 class TranslateJob : public AbstractJob
 {
 public:
-	TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQue::Ptr readQue, DataQue::Ptr writeQue);
+	TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue);
 	virtual ~TranslateJob();
 
 protected:
@@ -58,7 +58,7 @@ private:
 	int levelparameterid_(const std::string & parametername, pqxx::work & transaction);
 	std::string now_(pqxx::work & transaction);
 
-	DataQue::Ptr readQue_;
+	DataQueue::Ptr readQueue_;
 	std::string pqConnectString_;
 	std::string wciUser_;
 	std::string nameSpace_;

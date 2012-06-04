@@ -16,5 +16,6 @@ wdb-fastload.man:	wdb-fastload
 include src/fastload.mk
 
 EXTRA_DIST = example/example.dat
+CLEANFILES = $(man1_MANS)
 
 include mk/debian.mk

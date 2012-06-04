@@ -32,8 +32,8 @@
 namespace fastload
 {
 
-AbstractJob::AbstractJob(DataQue::Ptr que) :
-		que_(que),
+AbstractJob::AbstractJob(DataQueue::Ptr queue) :
+		queue_(queue),
 		runInformation_(new RunInformation)
 {
 	runInformation_->status = Ready;
@@ -56,7 +56,7 @@ void AbstractJob::operator () ()
 	{
 		runInformation_->status = Error;
 		runInformation_->errorMessage = e.what();
-		que_->shutdown();
+		queue_->shutdown();
 	}
 }
 

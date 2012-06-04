@@ -56,7 +56,7 @@ void checkForErrors(const fastload::AbstractJob & job)
 	}
 }
 
-void copyData(std::istream & source, fastload::DataQue & sink)
+void copyData(std::istream & source, fastload::DataQueue & sink)
 {
 	std::string line;
 	while ( std::getline(source, line) )
@@ -83,8 +83,8 @@ int main(int argc, char ** argv)
 	log.addAppender(appender);
 	log.setPriority(configuration.logLevel());
 
-	fastload::DataQue::Ptr rawQue(new fastload::DataQue(50000, "raw"));
-	fastload::DataQue::Ptr translatedQue(new fastload::DataQue(1000, "translated"));
+	fastload::DataQueue::Ptr rawQue(new fastload::DataQueue(50000, "raw"));
+	fastload::DataQueue::Ptr translatedQue(new fastload::DataQueue(1000, "translated"));
 
 	fastload::old::TranslateJob translateJob(configuration.pqConnect(), configuration.wciUser(), configuration.nameSpace(), rawQue, translatedQue);
 	boost::thread translateThread(translateJob);

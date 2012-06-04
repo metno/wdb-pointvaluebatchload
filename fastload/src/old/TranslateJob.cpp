@@ -38,9 +38,9 @@ namespace fastload
 namespace old
 {
 
-TranslateJob::TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQue::Ptr readQue, DataQue::Ptr writeQue) :
-		AbstractJob(writeQue),
-		readQue_(readQue),
+TranslateJob::TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue) :
+		AbstractJob(writeQueue),
+		readQueue_(readQueue),
 		pqConnectString_(pqConnectString),
 		wciUser_(wciUser),
 		nameSpace_(nameSpace)
@@ -60,7 +60,7 @@ void TranslateJob::run()
 
 		std::string dataprovider;
 		std::string input;
-		while ( readQue_->get(input) )
+		while ( readQueue_->get(input) )
 		{
 			boost::trim(input);
 
@@ -71,13 +71,13 @@ void TranslateJob::run()
 			else if ( dataprovider.empty() )
 				dataprovider = updateDataprovider_(input, transaction);
 			else
-				que_->put(translate(input, dataprovider, transaction));
+				queue_->put(translate(input, dataprovider, transaction));
 		}
-		que_->done();
+		queue_->done();
 	}
 	catch ( std::exception & )
 	{
-		readQue_->shutdown();
+		readQueue_->shutdown();
 		throw;
 	}
 }

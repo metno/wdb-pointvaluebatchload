@@ -40,7 +40,7 @@ Connection connect(const char * conninfo)
 }
 }
 
-AbstractDatabaseJob::AbstractDatabaseJob(const std::string & pqConnectString, DataQue::Ptr que) :
+AbstractDatabaseJob::AbstractDatabaseJob(const std::string & pqConnectString, DataQueue::Ptr que) :
 		AbstractJob(que),
 		pqConnectString_(pqConnectString)
 {

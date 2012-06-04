@@ -40,7 +40,7 @@ namespace old
 class CopyJob : public AbstractDatabaseJob
 {
 public:
-	CopyJob(const std::string & pqConnectString, DataQue::Ptr que);
+	CopyJob(const std::string & pqConnectString, DataQueue::Ptr que);
 	~CopyJob();
 
 protected:

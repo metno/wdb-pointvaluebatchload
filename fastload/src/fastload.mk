@@ -6,8 +6,8 @@ wdb_fastload_SOURCES += \
 	src/AbstractJob.h \
 	src/Configuration.cpp \
 	src/Configuration.h \
-	src/DataQue.cpp \
-	src/DataQue.h \
+	src/DataQueue.cpp \
+	src/DataQueue.h \
 	src/InputData.cpp \
 	src/InputData.h
 

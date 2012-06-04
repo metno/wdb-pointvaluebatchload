@@ -39,13 +39,13 @@
 namespace fastload
 {
 
-class DataQue : boost::noncopyable
+class DataQueue : boost::noncopyable
 {
 public:
-	explicit DataQue(unsigned maxQueSize = 500000, const std::string & queName = std::string());
-	~DataQue();
+	explicit DataQueue(unsigned maxQueSize = 500000, const std::string & queName = std::string());
+	~DataQueue();
 
-	typedef boost::shared_ptr<DataQue> Ptr;
+	typedef boost::shared_ptr<DataQueue> Ptr;
 
 	typedef std::string Data;
 

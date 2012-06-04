@@ -39,7 +39,7 @@ namespace fastload
 class AbstractDatabaseJob : public AbstractJob
 {
 public:
-	AbstractDatabaseJob(const std::string & pqConnectString, DataQue::Ptr que);
+	AbstractDatabaseJob(const std::string & pqConnectString, DataQueue::Ptr que);
 	virtual ~AbstractDatabaseJob();
 
 protected:

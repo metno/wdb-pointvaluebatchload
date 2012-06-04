@@ -26,13 +26,13 @@
  MA  02110-1301, USA
  */
 
-#include "DataQue.h"
+#include "DataQueue.h"
 #include <log4cpp/Category.hh>
 
 namespace fastload
 {
 
-DataQue::DataQue(unsigned maxQueSize, const std::string & queName) :
+DataQueue::DataQueue(unsigned maxQueSize, const std::string & queName) :
 		status_(Ready),
 		maxQueSize_(maxQueSize),
 		queName_(queName),
@@ -41,11 +41,11 @@ DataQue::DataQue(unsigned maxQueSize, const std::string & queName) :
 {
 }
 
-DataQue::~DataQue()
+DataQueue::~DataQueue()
 {
 }
 
-bool DataQue::get(DataQue::Data & out)
+bool DataQueue::get(DataQueue::Data & out)
 {
 	log4cpp::Category & log = log4cpp::Category::getInstance( "wdb.fastload.DataQue.get." + queName_ );
 
@@ -81,7 +81,7 @@ bool DataQue::get(DataQue::Data & out)
 	return true;
 }
 
-void DataQue::put(const DataQue::Data & element)
+void DataQueue::put(const DataQueue::Data & element)
 {
 	log4cpp::Category & log = log4cpp::Category::getInstance( "wdb.fastload.DataQue.put" + queName_ );
 
@@ -103,13 +103,13 @@ void DataQue::put(const DataQue::Data & element)
 	condition_.notify_one();
 }
 
-void DataQue::done()
+void DataQueue::done()
 {
 	status_ = Done;
 	condition_.notify_all();
 }
 
-void DataQue::shutdown()
+void DataQueue::shutdown()
 {
 	log4cpp::Category & log = log4cpp::Category::getInstance( "wdb.fastload.DataQue." + queName_ );
 	log.warn("shutdown");
