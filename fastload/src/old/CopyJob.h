@@ -33,6 +33,9 @@
 
 namespace fastload
 {
+namespace old
+{
+
 
 class CopyJob : public AbstractDatabaseJob
 {
@@ -49,5 +52,6 @@ private:
 	void endCopy(PGconn * connection);
 };
 
+}
 }
 #endif /* COPYTHREAD_H_ */

@@ -27,8 +27,8 @@
 */
 
 
-#include "CopyJob.h"
-#include "TranslateJob.h"
+#include "old/CopyJob.h"
+#include "old/TranslateJob.h"
 #include "Configuration.h"
 
 #include <log4cpp/Appender.hh>
@@ -86,10 +86,10 @@ int main(int argc, char ** argv)
 	fastload::DataQue::Ptr rawQue(new fastload::DataQue(50000, "raw"));
 	fastload::DataQue::Ptr translatedQue(new fastload::DataQue(1000, "translated"));
 
-	fastload::TranslateJob translateJob(configuration.pqConnect(), configuration.wciUser(), configuration.nameSpace(), rawQue, translatedQue);
+	fastload::old::TranslateJob translateJob(configuration.pqConnect(), configuration.wciUser(), configuration.nameSpace(), rawQue, translatedQue);
 	boost::thread translateThread(translateJob);
 
-	fastload::CopyJob copyJob(configuration.pqConnect(), translatedQue);
+	fastload::old::CopyJob copyJob(configuration.pqConnect(), translatedQue);
 	boost::thread copyThread(copyJob);
 
 	try

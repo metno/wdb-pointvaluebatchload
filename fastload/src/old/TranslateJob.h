@@ -35,6 +35,8 @@
 
 namespace fastload
 {
+namespace old
+{
 
 class TranslateJob : public AbstractJob
 {
@@ -68,5 +70,7 @@ private:
 	std::string timeNow_;
 };
 
-} /* namespace fastload */
+}
+}
+
 #endif /* TRANSLATEJOB_H_ */

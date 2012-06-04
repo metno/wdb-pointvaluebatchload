@@ -35,6 +35,8 @@
 
 namespace fastload
 {
+namespace old
+{
 
 TranslateJob::TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQue::Ptr readQue, DataQue::Ptr writeQue) :
 		AbstractJob(writeQue),
@@ -199,4 +201,5 @@ std::string TranslateJob::now_(pqxx::work & transaction)
 	return timeNow_;
 }
 
+}
 }

@@ -30,6 +30,8 @@
 
 namespace fastload
 {
+namespace old
+{
 
 CopyJob::CopyJob(const std::string & pqConnectString, DataQue::Ptr que) :
 		AbstractDatabaseJob(pqConnectString, que)
@@ -79,4 +81,5 @@ void CopyJob::performQueries(PGconn * connection)
 	endCopy(connection);
 }
 
+}
 }
