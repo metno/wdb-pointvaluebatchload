@@ -26,7 +26,7 @@
  MA  02110-1301, USA
  */
 
-#include "TranslateJob.h"
+#include "OldTranslateJob.h"
 #include "InputData.h"
 #include <pqxx/pqxx>
 #include <boost/algorithm/string.hpp>
@@ -38,7 +38,7 @@ namespace fastload
 namespace old
 {
 
-TranslateJob::TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue) :
+OldTranslateJob::OldTranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue) :
 		AbstractJob(writeQueue),
 		readQueue_(readQueue),
 		pqConnectString_(pqConnectString),
@@ -47,11 +47,11 @@ TranslateJob::TranslateJob(const std::string & pqConnectString, const std::strin
 {
 }
 
-TranslateJob::~TranslateJob()
+OldTranslateJob::~OldTranslateJob()
 {
 }
 
-void TranslateJob::run()
+void OldTranslateJob::run()
 {
 	try
 	{
@@ -82,7 +82,7 @@ void TranslateJob::run()
 	}
 }
 
-std::string TranslateJob::translate(const std::string & what, const std::string & dataprovider, pqxx::work & transaction)
+std::string OldTranslateJob::translate(const std::string & what, const std::string & dataprovider, pqxx::work & transaction)
 {
 	InputData inputData(what, dataprovider);
 
@@ -110,7 +110,7 @@ std::string TranslateJob::translate(const std::string & what, const std::string 
 	return s.str();
 }
 
-std::string TranslateJob::updateDataprovider_(const std::string & dataproviderSpec, pqxx::work & transaction)
+std::string OldTranslateJob::updateDataprovider_(const std::string & dataproviderSpec, pqxx::work & transaction)
 {
 	std::vector<std::string> elements;
 	boost::split(elements, dataproviderSpec, boost::is_any_of("\t"));
@@ -131,7 +131,7 @@ std::string TranslateJob::updateDataprovider_(const std::string & dataproviderSp
 	return dataprovider;
 }
 
-long long TranslateJob::dataproviderid_(const std::string & dataprovidername, pqxx::work & transaction)
+long long OldTranslateJob::dataproviderid_(const std::string & dataprovidername, pqxx::work & transaction)
 {
 	long long & dataproviderid = dataproviders_[dataprovidername];
 	if ( ! dataproviderid )
@@ -146,7 +146,7 @@ long long TranslateJob::dataproviderid_(const std::string & dataprovidername, pq
 	return dataproviderid;
 }
 
-long long TranslateJob::placeid_(const std::string & placename, pqxx::work & transaction)
+long long OldTranslateJob::placeid_(const std::string & placename, pqxx::work & transaction)
 {
 	long long & placeid = placeids_[placename];
 	if ( ! placeid )
@@ -161,7 +161,7 @@ long long TranslateJob::placeid_(const std::string & placename, pqxx::work & tra
 	return placeid;
 }
 
-int TranslateJob::valueparameterid_(const std::string & parametername, pqxx::work & transaction)
+int OldTranslateJob::valueparameterid_(const std::string & parametername, pqxx::work & transaction)
 {
 	int & paramid = valueparameterids_[parametername];
 	if ( ! paramid )
@@ -176,7 +176,7 @@ int TranslateJob::valueparameterid_(const std::string & parametername, pqxx::wor
 	return paramid;
 }
 
-int TranslateJob::levelparameterid_(const std::string & parametername, pqxx::work & transaction)
+int OldTranslateJob::levelparameterid_(const std::string & parametername, pqxx::work & transaction)
 {
 	int & paramid = levelparameterids_[parametername];
 	if ( ! paramid )
@@ -191,7 +191,7 @@ int TranslateJob::levelparameterid_(const std::string & parametername, pqxx::wor
 	return paramid;
 }
 
-std::string TranslateJob::now_(pqxx::work & transaction)
+std::string OldTranslateJob::now_(pqxx::work & transaction)
 {
 	if ( timeNow_.empty() )
 	{

@@ -38,11 +38,11 @@ namespace fastload
 namespace old
 {
 
-class TranslateJob : public AbstractJob
+class OldTranslateJob : public AbstractJob
 {
 public:
-	TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue);
-	virtual ~TranslateJob();
+	OldTranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue);
+	virtual ~OldTranslateJob();
 
 protected:
 	virtual void run();

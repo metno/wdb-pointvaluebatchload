@@ -9,6 +9,8 @@ wdb_fastload_SOURCES += \
 	src/DataQueue.cpp \
 	src/DataQueue.h \
 	src/InputData.cpp \
-	src/InputData.h
+	src/InputData.h \
+	src/TranslateJob.cpp \
+	src/TranslateJob.h
 
 include src/old/fastload.mk

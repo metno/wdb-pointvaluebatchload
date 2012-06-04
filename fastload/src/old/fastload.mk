@@ -1,5 +1,5 @@
 wdb_fastload_SOURCES += \
-	src/old/TranslateJob.cpp \
-	src/old/TranslateJob.h \
+	src/old/OldTranslateJob.cpp \
+	src/old/OldTranslateJob.h \
 	src/old/CopyJob.cpp \
 	src/old/CopyJob.h
