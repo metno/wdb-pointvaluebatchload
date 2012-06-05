@@ -11,6 +11,8 @@ wdb_fastload_SOURCES += \
 	src/InputData.cpp \
 	src/InputData.h \
 	src/TranslateJob.cpp \
-	src/TranslateJob.h
-
-include src/old/fastload.mk
+	src/TranslateJob.h \
+	src/DatabaseTranslator.cpp \
+	src/DatabaseTranslator.h \
+	src/CopyJob.cpp \
+	src/CopyJob.h

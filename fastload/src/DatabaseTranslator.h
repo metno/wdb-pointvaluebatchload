@@ -26,40 +26,48 @@
  MA  02110-1301, USA
  */
 
-#ifndef TRANSLATEJOB_H_
-#define TRANSLATEJOB_H_
+#ifndef DATABASETRANSLATOR_H_
+#define DATABASETRANSLATOR_H_
 
-#include "AbstractJob.h"
+#include <pqxx/connection.hxx>
 #include <pqxx/transaction>
+#include <boost/date_time/posix_time/posix_time_duration.hpp>
+#include <string>
 #include <map>
+
 
 namespace fastload
 {
-namespace old
-{
 
-class OldTranslateJob : public AbstractJob
+class DatabaseTranslator
 {
 public:
-	OldTranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue);
-	virtual ~OldTranslateJob();
+	DatabaseTranslator(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace);
+	~DatabaseTranslator();
 
-protected:
-	virtual void run();
+	std::string updateDataprovider(const std::string & dataproviderSpec);
+
+	long long dataproviderid(const std::string & dataprovidername);
+	long long placeid(const std::string & placename);
+	int valueparameterid(const std::string & parametername);
+	int levelparameterid(const std::string & parametername);
+	std::string now();
+
+	typedef boost::posix_time::time_duration Duration;
+
+	int getValueGroup(const std::string & dataprovidername,
+			const std::string & placename,
+			const Duration & validTimeFrom,
+			const Duration & validTimeTo,
+			const std::string & valueparametername,
+			const std::string & levelparametername,
+			float levelfrom,
+			float levelto,
+			int dataversion);
 
 private:
-	std::string translate(const std::string & what, const std::string & dataprovider, pqxx::work & transaction);
-
-	std::string updateDataprovider_(const std::string & dataproviderSpec, pqxx::work & transaction);
-
-	long long dataproviderid_(const std::string & dataprovidername, pqxx::work & transaction);
-	long long placeid_(const std::string & placename, pqxx::work & transaction);
-	int valueparameterid_(const std::string & parametername, pqxx::work & transaction);
-	int levelparameterid_(const std::string & parametername, pqxx::work & transaction);
-	std::string now_(pqxx::work & transaction);
-
-	DataQueue::Ptr readQueue_;
-	std::string pqConnectString_;
+	pqxx::connection connection_;
+	pqxx::work * transaction_;
 	std::string wciUser_;
 	std::string nameSpace_;
 
@@ -68,9 +76,8 @@ private:
 	std::map<std::string, int> valueparameterids_;
 	std::map<std::string, int> levelparameterids_;
 	std::string timeNow_;
+
 };
 
-}
-}
-
-#endif /* TRANSLATEJOB_H_ */
+} /* namespace fastload */
+#endif /* DATABASETRANSLATOR_H_ */

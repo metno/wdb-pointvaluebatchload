@@ -4,8 +4,8 @@ bin_PROGRAMS = wdb-fastload
 
 wdb_fastload_SOURCES =
 
-wdb_fastload_CPPFLAGS = -I$(top_srcdir)/src/ $(wdb_CFLAGS)
-wdb_fastload_LDADD = $(wdb_LIBS) $(BOOST_THREAD_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) -lpq
+wdb_fastload_CPPFLAGS = $(wdb_CFLAGS)
+wdb_fastload_LDADD = $(wdb_LIBS) $(BOOST_THREAD_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_DATE_TIME_LIB) -lpq
 
 man1_MANS = wdb-fastload.man
 

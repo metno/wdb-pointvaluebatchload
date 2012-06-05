@@ -30,19 +30,31 @@
 #define TRANSLATEJOB_H_
 
 #include "AbstractJob.h"
+#include <pqxx/transaction>
+#include <map>
 
 namespace fastload
 {
+class DatabaseTranslator;
+
 
 class TranslateJob : public AbstractJob
 {
 public:
-	TranslateJob(DataQueue::Ptr queue);
+	TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue);
 	~TranslateJob();
 
 protected:
 	virtual void run();
 
+private:
+	virtual std::string getCopyStatement_(const std::string & what, const std::string & dataprovider, DatabaseTranslator & translator);
+
+	DataQueue::Ptr readQueue_;
+
+	std::string pqConnectString_;
+	std::string wciUser_;
+	std::string nameSpace_;
 };
 
 } /* namespace fastload */

@@ -34,6 +34,17 @@
 
 namespace fastload
 {
+namespace
+{
+boost::posix_time::ptime timeFromString(std::string s)
+{
+	if ( s.size() < 19 )
+		throw std::invalid_argument("invalid time specification");
+	s[10] = ' '; // In case 'T' was used as a separator
+	s.resize(19);
+	return boost::posix_time::time_from_string(s);
+}
+}
 
 InputData::InputData(const std::string & inputLine, const std::string dataprovider) :
 		dataprovider_(dataprovider)
@@ -49,9 +60,9 @@ InputData::InputData(const std::string & inputLine, const std::string dataprovid
 
 	value_ = boost::lexical_cast<float>(splitData[0]);
 	placename_ = splitData[1];
-	referencetime_ = splitData[2];
-	validfrom_ = splitData[3];
-	validto_ = splitData[4];
+	referencetime_ = timeFromString(splitData[2]);
+	validfrom_ = timeFromString(splitData[3]);
+	validto_ = timeFromString(splitData[4]);
 	valueparametername_ = splitData[5];
 	levelparametername_ = splitData[6];
 	levelfrom_ = boost::lexical_cast<float>(splitData[7]);

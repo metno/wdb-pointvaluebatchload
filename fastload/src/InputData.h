@@ -30,6 +30,7 @@
 #define INPUTDATA_H_
 
 #include <string>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 
 namespace fastload
@@ -41,12 +42,14 @@ public:
 	InputData(const std::string & inputLine, const std::string dataprovider);
 	~InputData();
 
+	typedef boost::posix_time::ptime Time;
+
 	const std::string & dataprovider() const { return dataprovider_; }
 	float value() const { return value_; }
 	const std::string & placename() const { return placename_; }
-	const std::string & referencetime() const { return referencetime_; }
-	const std::string & validfrom() const { return validfrom_; }
-	const std::string & validto() const { return validto_; }
+	const Time & referencetime() const { return referencetime_; }
+	const Time & validfrom() const { return validfrom_; }
+	const Time & validto() const { return validto_; }
 	const std::string & valueparametername() const { return valueparametername_; }
 	const std::string & levelparametername() const { return levelparametername_; }
 	float levelfrom() const { return levelfrom_; }
@@ -59,9 +62,9 @@ private:
 	std::string dataprovider_;
 	float value_;
 	std::string placename_;
-	std::string referencetime_;
-	std::string validfrom_;
-	std::string validto_;
+	Time referencetime_;
+	Time validfrom_;
+	Time validto_;
 	std::string valueparametername_;
 	std::string levelparametername_;
 	float levelfrom_;

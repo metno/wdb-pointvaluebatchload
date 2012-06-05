@@ -27,6 +27,7 @@
  */
 
 #include "CopyJob.h"
+#include <iostream>
 
 namespace fastload
 {
@@ -44,8 +45,11 @@ CopyJob::~CopyJob()
 
 void CopyJob::beginCopy(PGconn * connection)
 {
+	//const char * copyStatement = "COPY wdb_int.floatvalue (valuetype, dataproviderid, placeid, referencetime, validtimefrom, validtimeto, validtimeindeterminatecode, valueparameterid, levelparameterid, levelfrom, levelto, levelindeterminatecode, dataversion, maxdataversion, confidencecode, value, valuestoretime) FROM STDIN";
+	const char * copyStatement = "COPY wdb_int.floatvalueitem (valuegroupid, referencetime, maxdataversion, confidencecode, value, valuestoretime) FROM STDIN";
+
 	boost::shared_ptr<PGresult> result(
-			PQexec(connection, "COPY wdb_int.floatvalue (valuetype, dataproviderid, placeid, referencetime, validtimefrom, validtimeto, validtimeindeterminatecode, valueparameterid, levelparameterid, levelfrom, levelto, levelindeterminatecode, dataversion, maxdataversion, confidencecode, value, valuestoretime) FROM STDIN"),
+			PQexec(connection, copyStatement),
 			PQclear
 	);
 	checkResult(PGRES_COPY_IN, result.get());
