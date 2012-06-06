@@ -15,4 +15,7 @@ wdb_fastload_SOURCES += \
 	src/DatabaseTranslator.cpp \
 	src/DatabaseTranslator.h \
 	src/CopyJob.cpp \
-	src/CopyJob.h
+	src/CopyJob.h \
+	src/FloatValueGroup.cpp \
+	src/FloatValueGroup.h
+	

@@ -58,10 +58,10 @@ std::string DatabaseTranslator::updateDataprovider(const std::string & dataprovi
 	if ( elements.size() == 2 or not nameSpace_.empty() )
 	{
 		std::string ns = nameSpace_.empty() ? elements[1] : nameSpace_;
-		transaction_->exec("SELECT wci.begin('" + transaction_->esc(wciUser_) + "', " + transaction_->esc(ns) + ")");
+		exec("SELECT wci.begin('" + transaction_->esc(wciUser_) + "', " + transaction_->esc(ns) + ")");
 	}
 	else // if ( elements.size() == 1 )
-		transaction_->exec("SELECT wci.begin('" + transaction_->esc(wciUser_) + "')");
+		exec("SELECT wci.begin('" + transaction_->esc(wciUser_) + "')");
 
 	return dataprovider;
 }
@@ -73,7 +73,7 @@ long long DatabaseTranslator::dataproviderid(const std::string & dataprovidernam
 	{
 		std::ostringstream query;
 		query << "SELECT wci_int.idfromdataprovider('" << transaction_->esc(dataprovidername) << "')";
-		pqxx::result result = transaction_->exec(query.str());
+		pqxx::result result = exec(query.str());
 		if ( result.empty() )
 			throw std::runtime_error("Not a recognized dataprovider: " + dataprovidername);
 		dataproviderid = result[0][0].as<long long>();
@@ -88,7 +88,7 @@ long long DatabaseTranslator::placeid(const std::string & placename)
 	{
 		std::ostringstream query;
 		query << "SELECT placeid FROM wci.getplacedefinition('" << transaction_->esc(placename) << "')";
-		pqxx::result result = transaction_->exec(query.str());
+		pqxx::result result = exec(query.str());
 		if ( result.empty() )
 			throw std::runtime_error("Not a recognized placename: " + placename);
 		placeid = result[0][0].as<long long>();
@@ -103,7 +103,7 @@ int DatabaseTranslator::valueparameterid(const std::string & parametername)
 	{
 		std::ostringstream query;
 		query << "SELECT wci_int.getvalueparameterid(wci_int.normalizeparameter('" << transaction_->esc(parametername) << "'))";
-		pqxx::result result = transaction_->exec(query.str());
+		pqxx::result result = exec(query.str());
 		if ( result.empty() )
 			throw std::runtime_error("Not a recognized value parameter: " + parametername);
 		paramid = result[0][0].as<int>();
@@ -118,7 +118,7 @@ int DatabaseTranslator::levelparameterid(const std::string & parametername)
 	{
 		std::ostringstream query;
 		query << "SELECT wci_int.getlevelparameterid(wci_int.normalizelevelparameter('" << transaction_->esc(parametername) << "'))";
-		pqxx::result result = transaction_->exec(query.str());
+		pqxx::result result = exec(query.str());
 		if ( result.empty() )
 			throw std::runtime_error("Not a recognized level parameter: " + parametername);
 		paramid = result[0][0].as<int>();
@@ -130,7 +130,7 @@ std::string DatabaseTranslator::now()
 {
 	if ( timeNow_.empty() )
 	{
-		pqxx::result result = transaction_->exec("SELECT now()");
+		pqxx::result result = exec("SELECT now()");
 		timeNow_ = result[0][0].as<std::string>();
 	}
 	return timeNow_;
@@ -153,47 +153,43 @@ int DatabaseTranslator::getValueGroup(const std::string & dataprovidername,
 	int valueparameterId = valueparameterid(valueparametername);
 	int levelparameterId = levelparameterid(levelparametername);
 
-	std::stringstream query;
-	query << "SELECT valuegroupid FROM wdb_int.floatvaluegroup WHERE "
-			"dataproviderid=" << dataproviderId << " AND "
-			"placeid=" << placeId << " AND "
-			"validtimefrom='" << validfrom << "' AND "
-			"validtimeto='" << validto << "' AND "
-			"valueparameterid=" << valueparameterId << " AND "
-			"levelparameterid=" << levelparameterId << " AND "
-			"levelfrom=" << levelfrom << " AND "
-			"levelto=" << levelto << " AND "
-			"dataversion=" << dataversion;
-	//std::cout << query.str() << std::endl;
+	FloatValueGroup wantedValueGroup(dataproviderId, placeId, validTimeFrom, validTimeTo, 0, valueparameterId, levelparameterId, levelfrom, levelto, 0, dataversion);
 
-	pqxx::result r = transaction_->exec(query);
-
-	if ( r.empty() )
+	std::map<FloatValueGroup, int>::const_iterator find = floatValueGroups_.find(wantedValueGroup);
+	if ( find == floatValueGroups_.end() ) // was not in memory, so we must contact database
 	{
-		pqxx::result id = transaction_->exec("SELECT nextval('wdb_int.floatvaluegroup_valuegroupid_seq')");
-		int valueGroupId = id.at(0).at(0).as<int>();
+		if ( queriedDataprovidersAndPlaces_.find(std::make_pair(dataproviderId, placeId)) == queriedDataprovidersAndPlaces_.end() )
+		{
+			queriedDataprovidersAndPlaces_.insert(std::make_pair(dataproviderId, placeId));
+			std::stringstream query;
+			query << "SELECT * FROM wdb_int.floatvaluegroup WHERE "
+					"dataproviderid=" << dataproviderId << " AND "
+					"placeid=" << placeId;
+			pqxx::result result = exec(query.str());
 
-		std::stringstream query;
-		query << "INSERT INTO wdb_int.floatvaluegroup VALUES (" <<
-				valueGroupId <<','<<
-				dataproviderId <<','<<
-				placeId <<','<<
-				'\'' << validfrom << "',"<<
-				'\'' << validto << "',"<<
-				0 <<','<<
-				valueparameterId <<','<<
-				levelparameterId <<','<<
-				levelfrom <<','<<
-				levelto <<','<<
-				0 <<','<<
-				dataversion << ")";
+			for ( pqxx::result::const_iterator it = result.begin(); it != result.end(); ++ it )
+				floatValueGroups_[*it] = (*it)[0].as<int>();
+			find = floatValueGroups_.find(wantedValueGroup);
+		}
 
-		transaction_->exec(query);
+		if ( find == floatValueGroups_.end() ) // was not in database, so we must create storage
+		{
+			pqxx::result id = exec("SELECT nextval('wdb_int.floatvaluegroup_valuegroupid_seq')");
+			int valueGroupId = id.at(0).at(0).as<int>();
 
-		return valueGroupId;
+			std::string insert = wantedValueGroup.databaseInsertStatement(valueGroupId);
+			exec(insert);
+			floatValueGroups_[wantedValueGroup] = valueGroupId;
+			return valueGroupId;
+		}
 	}
-	return r[0][0].as<int>();
+	return find->second;
 }
 
+pqxx::result DatabaseTranslator::exec(const std::string & query)
+{
+	//std::clog << query << std::endl;
+	return transaction_->exec(query);
+}
 
 } /* namespace fastload */

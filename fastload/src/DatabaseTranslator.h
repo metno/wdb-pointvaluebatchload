@@ -29,11 +29,13 @@
 #ifndef DATABASETRANSLATOR_H_
 #define DATABASETRANSLATOR_H_
 
+#include "FloatValueGroup.h"
 #include <pqxx/connection.hxx>
 #include <pqxx/transaction>
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <string>
 #include <map>
+#include <set>
 
 
 namespace fastload
@@ -52,7 +54,6 @@ public:
 	int valueparameterid(const std::string & parametername);
 	int levelparameterid(const std::string & parametername);
 	std::string now();
-
 	typedef boost::posix_time::time_duration Duration;
 
 	int getValueGroup(const std::string & dataprovidername,
@@ -66,6 +67,8 @@ public:
 			int dataversion);
 
 private:
+	pqxx::result exec(const std::string & query);
+
 	pqxx::connection connection_;
 	pqxx::work * transaction_;
 	std::string wciUser_;
@@ -77,6 +80,8 @@ private:
 	std::map<std::string, int> levelparameterids_;
 	std::string timeNow_;
 
+	std::map<FloatValueGroup, int> floatValueGroups_;
+	std::set<std::pair<long long, long long> > queriedDataprovidersAndPlaces_;
 };
 
 } /* namespace fastload */
