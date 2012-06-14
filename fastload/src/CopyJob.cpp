@@ -43,20 +43,33 @@ CopyJob::~CopyJob()
 {
 }
 
-void CopyJob::beginCopy(PGconn * connection)
-{
-	//const char * copyStatement = "COPY wdb_int.floatvalue (valuetype, dataproviderid, placeid, referencetime, validtimefrom, validtimeto, validtimeindeterminatecode, valueparameterid, levelparameterid, levelfrom, levelto, levelindeterminatecode, dataversion, maxdataversion, confidencecode, value, valuestoretime) FROM STDIN";
-	const char * copyStatement = "COPY wdb_int.floatvalueitem (valuegroupid, referencetime, maxdataversion, confidencecode, value, valuestoretime) FROM STDIN";
-
-	boost::shared_ptr<PGresult> result(
-			PQexec(connection, copyStatement),
-			PQclear
-	);
-	checkResult(PGRES_COPY_IN, result.get());
-}
+//void CopyJob::beginCopy(PGconn * connection)
+//{
+//	//const char * copyStatement = "COPY wdb_int.floatvalue (valuetype, dataproviderid, placeid, referencetime, validtimefrom, validtimeto, validtimeindeterminatecode, valueparameterid, levelparameterid, levelfrom, levelto, levelindeterminatecode, dataversion, maxdataversion, confidencecode, value, valuestoretime) FROM STDIN";
+//	const char * copyStatement = "COPY wdb_int.floatvalueitem (valuegroupid, referencetime, maxdataversion, confidencecode, value, valuestoretime) FROM STDIN";
+//
+//	boost::shared_ptr<PGresult> result(
+//			PQexec(connection, copyStatement),
+//			PQclear
+//	);
+//	checkResult(PGRES_COPY_IN, result.get());
+//}
 
 void CopyJob::copyRow(PGconn * connection, const std::string & row)
 {
+	if ( row[0] == 'C' )
+	{
+		if ( row.substr(0, 5) == "COPY " )
+		{
+			boost::shared_ptr<PGresult> result(
+					PQexec(connection, row.c_str()),
+					PQclear
+			);
+			checkResult(PGRES_COPY_IN, result.get());
+			return;
+		}
+	}
+
 	int ok = PQputCopyData(connection, row.c_str(), row.size());
 	if ( ok == -1 )
 		throw std::runtime_error("wtf??");
@@ -76,8 +89,6 @@ void CopyJob::endCopy(PGconn * connection)
 
 void CopyJob::performQueries(PGconn * connection)
 {
-	beginCopy(connection);
-
 	std::string data;
 	while ( queue_->get(data) )
 		copyRow(connection, data);

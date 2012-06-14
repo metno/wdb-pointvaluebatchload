@@ -66,6 +66,8 @@ public:
 			float levelto,
 			int dataversion);
 
+	std::string wciVersion();
+
 private:
 	pqxx::result exec(const std::string & query);
 
@@ -79,6 +81,7 @@ private:
 	std::map<std::string, int> valueparameterids_;
 	std::map<std::string, int> levelparameterids_;
 	std::string timeNow_;
+	std::string wciVersion_;
 
 	std::map<FloatValueGroup, int> floatValueGroups_;
 	std::set<std::pair<long long, long long> > queriedDataprovidersAndPlaces_;

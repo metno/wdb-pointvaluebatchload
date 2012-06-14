@@ -186,6 +186,16 @@ int DatabaseTranslator::getValueGroup(const std::string & dataprovidername,
 	return find->second;
 }
 
+std::string DatabaseTranslator::wciVersion()
+{
+	if ( wciVersion_.empty() )
+	{
+		pqxx::result r = exec("SELECT wci.version()");
+		wciVersion_ = r[0][0].as<std::string>();
+	}
+	return wciVersion_;
+}
+
 pqxx::result DatabaseTranslator::exec(const std::string & query)
 {
 	//std::clog << query << std::endl;

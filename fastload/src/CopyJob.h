@@ -47,7 +47,7 @@ protected:
 	virtual void performQueries(PGconn * connection);
 
 private:
-	void beginCopy(PGconn * connection);
+	//void beginCopy(PGconn * connection);
 	void copyRow(PGconn * connection, const std::string & row);
 	void endCopy(PGconn * connection);
 };

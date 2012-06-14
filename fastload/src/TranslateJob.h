@@ -50,6 +50,12 @@ protected:
 private:
 	virtual std::string getCopyStatement_(const std::string & what, const std::string & dataprovider, DatabaseTranslator & translator);
 
+	enum WdbInternalTableStructure
+	{
+		Old, New
+	};
+	WdbInternalTableStructure tableStructure_(DatabaseTranslator & translator);
+
 	DataQueue::Ptr readQueue_;
 
 	std::string pqConnectString_;
