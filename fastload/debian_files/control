@@ -6,9 +6,9 @@ Uploaders: Vegard Bones <vegard.bones@met.no>
 Build-Depends: cdbs,
  debhelper (>= 7),
  help2man,
- libboost-dev (>= 1.40),
- libboost-thread-dev (>= 1.40),
- libboost-program-options-dev (>= 1.40),
+ libboost1.48-dev | libboost-dev (>= 1.40),
+ libboost1.48-thread-dev | libboost-thread-dev (>= 1.40),
+ libboost1.48-program-options-dev | libboost-program-options-dev (>= 1.40),
  libpqxx-dev (>= 2.6.9) | libpqxx3-dev
 Standards-Version: 3.9.1
 

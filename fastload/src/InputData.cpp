@@ -46,6 +46,19 @@ boost::posix_time::ptime timeFromString(std::string s)
 }
 }
 
+template<typename T>
+T cast(const std::string & s)
+{
+	try
+	{
+		return boost::lexical_cast<T>(s);
+	}
+	catch ( boost::bad_lexical_cast & )
+	{
+		throw std::runtime_error(s + " could not be interpreted as " + std::string(typeid(T).name()));
+	}
+}
+
 InputData::InputData(const std::string & inputLine, const std::string dataprovider) :
 		dataprovider_(dataprovider)
 {
@@ -58,17 +71,17 @@ InputData::InputData(const std::string & inputLine, const std::string dataprovid
 	while ( splitData.size() < 11 )
 		splitData.push_back("0");
 
-	value_ = boost::lexical_cast<float>(splitData[0]);
+	value_ = cast<float>(splitData[0]);
 	placename_ = splitData[1];
 	referencetime_ = timeFromString(splitData[2]);
 	validfrom_ = timeFromString(splitData[3]);
 	validto_ = timeFromString(splitData[4]);
 	valueparametername_ = splitData[5];
 	levelparametername_ = splitData[6];
-	levelfrom_ = boost::lexical_cast<float>(splitData[7]);
-	levelto_ = boost::lexical_cast<float>(splitData[8]);
-	dataversion_ = boost::lexical_cast<int>(splitData[9]);
-	maxdataversion_ = boost::lexical_cast<int>(splitData[10]);
+	levelfrom_ = cast<float>(splitData[7]);
+	levelto_ = cast<float>(splitData[8]);
+	dataversion_ = cast<int>(splitData[9]);
+	maxdataversion_ = cast<int>(splitData[10]);
 }
 
 InputData::~InputData()
