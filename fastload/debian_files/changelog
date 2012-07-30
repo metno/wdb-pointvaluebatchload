@@ -1,3 +1,9 @@
+wdb-fastload (1.0.0-1) precise; urgency=low
+
+  * New version
+
+ -- Vegard Bønes <vegardb@wdb-dev3.met.no>  Mon, 30 Jul 2012 10:32:25 +0200
+
 wdb-fastload (0.9.1-1) precise; urgency=low
 
   * new version
