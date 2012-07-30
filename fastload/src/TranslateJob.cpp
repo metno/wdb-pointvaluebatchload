@@ -75,6 +75,7 @@ void TranslateJob::run()
 				queue_->put(nextLine);
 			}
 		}
+		translator_->commit();
 	}
 	catch ( std::exception & )
 	{

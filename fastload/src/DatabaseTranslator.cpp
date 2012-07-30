@@ -42,11 +42,7 @@ DatabaseTranslator::DatabaseTranslator(const std::string & pqConnectString, cons
 
 DatabaseTranslator::~DatabaseTranslator()
 {
-	if ( transaction_ )
-	{
-		transaction_->commit();
-		delete transaction_;
-	}
+	commit();
 }
 
 std::string DatabaseTranslator::updateDataprovider(const std::string & dataproviderSpec)
@@ -110,7 +106,6 @@ long long DatabaseTranslator::placeid(const std::string & placename, const Time 
 		std::ostringstream query;
 		query << "SELECT pv.placeid, " << timeQuery("pv.placenamevalidfrom") << ", " << timeQuery("pv.placenamevalidto") << " FROM wci_int.placedefinition_mv pv, wci_int.getsessiondata() s WHERE pv.placename='1005' AND pv.placenamespaceid = s.placenamespaceid";
 		//query << "SELECT placeid, " << timeQuery("placenamevalidfrom") << ", " << timeQuery("placenamevalidto") << " FROM wci.getplacedefinition('" << transaction().esc(placename) << "') ORDER BY placenamevalidfrom";
-		std::cout << query.str() << std::endl;
 
 		pqxx::result result = exec(query.str());
 		//if ( result.empty() )
@@ -126,11 +121,6 @@ long long DatabaseTranslator::placeid(const std::string & placename, const Time 
 			placeid[from] = (*it)[0].as<long long>();
 			placeid[to] = -1;
 		}
-
-		std::cout << "Times:" << std::endl;
-		for ( std::map<Time, long long>::const_iterator it = placeid.begin(); it != placeid.end(); ++ it )
-			std::cout << '\t' << it->first << " = " << it->second << std::endl;
-
 	}
 	//std::map<Time, long long>::const_iterator find = placeid.lower_bound(time);
 	std::map<Time, long long>::const_reverse_iterator find = placeid.rbegin();
@@ -143,8 +133,6 @@ long long DatabaseTranslator::placeid(const std::string & placename, const Time 
 
 	if ( find == placeid.rend() or find->second < 0 )
 		throw std::runtime_error("Unable to find a valid point for placename <" + placename + "> at time " + to_simple_string(time));
-
-	std::cout << "Returning placeid " << find->second << " for time " << time << std::endl;
 
 	return find->second;
 
@@ -262,6 +250,16 @@ std::string DatabaseTranslator::wciVersion()
 		wciVersion_ = r[0][0].as<std::string>();
 	}
 	return wciVersion_;
+}
+
+void DatabaseTranslator::commit()
+{
+	if ( transaction_ )
+	{
+		transaction_->commit();
+		delete transaction_;
+		transaction_ = 0;
+	}
 }
 
 pqxx::work & DatabaseTranslator::transaction()

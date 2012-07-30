@@ -68,6 +68,8 @@ public:
 
 	std::string wciVersion();
 
+	void commit();
+
 private:
 	pqxx::work & transaction();
 
