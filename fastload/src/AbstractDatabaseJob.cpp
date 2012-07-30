@@ -56,6 +56,10 @@ void AbstractDatabaseJob::run()
 	if ( ! connection )
 		throw std::runtime_error("Unable to connect to database");
 
+	PGresult * result = PQexec(connection.get(), "SET timezone TO 'UTC'");
+	if ( PQresultStatus(result) != PGRES_COMMAND_OK )
+		throw std::runtime_error(PQresultErrorMessage(result));
+
 	performQueries(connection.get());
 }
 

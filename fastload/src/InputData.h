@@ -29,8 +29,8 @@
 #ifndef INPUTDATA_H_
 #define INPUTDATA_H_
 
+#include "timetypes.h"
 #include <string>
-#include <boost/date_time/posix_time/posix_time.hpp>
 
 
 namespace fastload
@@ -41,8 +41,6 @@ class InputData
 public:
 	InputData(const std::string & inputLine, const std::string dataprovider);
 	~InputData();
-
-	typedef boost::posix_time::ptime Time;
 
 	const std::string & dataprovider() const { return dataprovider_; }
 	float value() const { return value_; }

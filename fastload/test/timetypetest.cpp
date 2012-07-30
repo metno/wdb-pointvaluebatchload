@@ -1,5 +1,5 @@
 /*
- fastload
+ fastload 
 
  Copyright (C) 2012 met.no
 
@@ -26,41 +26,27 @@
  MA  02110-1301, USA
  */
 
-#ifndef TRANSLATEJOB_H_
-#define TRANSLATEJOB_H_
+#include <boost/test/unit_test.hpp>
 
-#include "AbstractJob.h"
-#include <pqxx/transaction>
-#include <boost/shared_ptr.hpp>
-#include <map>
+#include <timetypes.h>
 
-namespace fastload
+using namespace fastload;
+
+namespace
 {
-class DatabaseTranslator;
-
-
-class TranslateJob : public AbstractJob
+Time time(const std::string & t)
 {
-public:
-	TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue);
-	~TranslateJob();
+	return boost::posix_time::time_from_string(t);
+}
+}
 
-protected:
-	virtual void run();
+BOOST_AUTO_TEST_CASE( parseTimeUtc )
+{
+	BOOST_CHECK_EQUAL(time("1999-04-15 18:00:00"), parseTime("1999-04-15 18:00:00Z"));
+	BOOST_CHECK_EQUAL(time("1999-04-15 18:00:00"), parseTime("1999-04-15 18:00:00+00"));
+}
 
-private:
-	virtual std::string getCopyStatement_(const std::string & what, const std::string & dataprovider);
-
-	enum WdbInternalTableStructure
-	{
-		Old, New
-	};
-	WdbInternalTableStructure tableStructure_();
-
-	DataQueue::Ptr readQueue_;
-
-	boost::shared_ptr<DatabaseTranslator> translator_;
-};
-
-} /* namespace fastload */
-#endif /* TRANSLATEJOB_H_ */
+BOOST_AUTO_TEST_CASE( parseTimeWithTimeZone )
+{
+	BOOST_CHECK_EQUAL(time("1999-04-15 20:00:00"), parseTime("1999-04-15 18:00:00+02"));
+}

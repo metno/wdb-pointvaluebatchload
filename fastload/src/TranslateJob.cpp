@@ -39,9 +39,7 @@ namespace fastload
 TranslateJob::TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue) :
 		AbstractJob(writeQueue),
 		readQueue_(readQueue),
-		pqConnectString_(pqConnectString),
-		wciUser_(wciUser),
-		nameSpace_(nameSpace)
+		translator_(new DatabaseTranslator(pqConnectString, wciUser, nameSpace))
 {
 }
 
@@ -53,9 +51,7 @@ void TranslateJob::run()
 {
 	try
 	{
-		DatabaseTranslator translator(pqConnectString_, wciUser_, nameSpace_);
-
-		if ( tableStructure_(translator) == New )
+		if ( tableStructure_() == New )
 			queue_->put("COPY wdb_int.floatvalueitem (valuegroupid, referencetime, maxdataversion, confidencecode, value, valuestoretime) FROM STDIN");
 		else
 			queue_->put("COPY wdb_int.floatvalue (valuetype, dataproviderid, placeid, referencetime, validtimefrom, validtimeto, validtimeindeterminatecode, valueparameterid, levelparameterid, levelfrom, levelto, levelindeterminatecode, dataversion, maxdataversion, confidencecode, value, valuestoretime) FROM STDIN");
@@ -72,10 +68,10 @@ void TranslateJob::run()
 			else if ( input[0] == '#' )
 				continue;
 			else if ( dataprovider.empty() )
-				dataprovider = translator.updateDataprovider(input);
+				dataprovider = translator_->updateDataprovider(input);
 			else
 			{
-				std::string nextLine = getCopyStatement_(input, dataprovider, translator);
+				std::string nextLine = getCopyStatement_(input, dataprovider);
 				queue_->put(nextLine);
 			}
 		}
@@ -96,15 +92,16 @@ int getValueGroup()
 }
 }
 
-std::string TranslateJob::getCopyStatement_(const std::string & what, const std::string & dataprovider, DatabaseTranslator & translator)
+std::string TranslateJob::getCopyStatement_(const std::string & what, const std::string & dataprovider)
 {
 	InputData inputData(what, dataprovider);
 
-	if ( tableStructure_(translator) == New )
+	if ( tableStructure_() == New )
 	{
-		int valueGroup = translator.getValueGroup(
+		int valueGroup = translator_->getValueGroup(
 				inputData.dataprovider(),
 				inputData.placename(),
+				inputData.referencetime(),
 				inputData.validfrom() - inputData.referencetime(),
 				inputData.validto() - inputData.referencetime(),
 				inputData.valueparametername(),
@@ -118,7 +115,7 @@ std::string TranslateJob::getCopyStatement_(const std::string & what, const std:
 				inputData.maxdataversion() <<sep<<
 				0 <<sep<<
 				inputData.value() <<sep<<
-				translator.now() << '\n';
+				translator_->now() << '\n';
 
 		return s.str();
 	}
@@ -127,14 +124,14 @@ std::string TranslateJob::getCopyStatement_(const std::string & what, const std:
 		char sep = '\t';
 		std::ostringstream s;
 		s << 1 <<sep<<
-				translator.dataproviderid(dataprovider) <<sep<<
-				translator.placeid(inputData.placename()) <<sep<<
+				translator_->dataproviderid(dataprovider) <<sep<<
+				translator_->placeid(inputData.placename(), inputData.validto()) <<sep<<
 				inputData.referencetime() <<sep<<
 				inputData.validfrom() <<sep<<
 				inputData.validto() <<sep<<
 				0 <<sep<<
-				translator.valueparameterid(inputData.valueparametername()) <<sep<<
-				translator.levelparameterid(inputData.levelparametername()) <<sep<<
+				translator_->valueparameterid(inputData.valueparametername()) <<sep<<
+				translator_->levelparameterid(inputData.levelparametername()) <<sep<<
 				inputData.levelfrom() <<sep<<
 				inputData.levelto() <<sep<<
 				0 <<sep<<
@@ -142,14 +139,14 @@ std::string TranslateJob::getCopyStatement_(const std::string & what, const std:
 				inputData.maxdataversion() <<sep<<
 				0 <<sep<<
 				inputData.value() <<sep<<
-				translator.now() << '\n';
+				translator_->now() << '\n';
 		return s.str();
 	}
 }
 
-TranslateJob::WdbInternalTableStructure TranslateJob::tableStructure_(DatabaseTranslator & translator)
+TranslateJob::WdbInternalTableStructure TranslateJob::tableStructure_()
 {
-	if ( translator.wciVersion() >= "WDB 1.3.0")
+	if ( translator_->wciVersion() >= "WDB 1.3.0")
 		return New;
 	return Old;
 }

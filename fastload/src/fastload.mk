@@ -1,5 +1,4 @@
-wdb_fastload_SOURCES += \
-	src/main.cpp \
+SOURCE = \
 	src/AbstractDatabaseJob.cpp \
 	src/AbstractDatabaseJob.h \
 	src/AbstractJob.cpp \
@@ -17,5 +16,11 @@ wdb_fastload_SOURCES += \
 	src/CopyJob.cpp \
 	src/CopyJob.h \
 	src/FloatValueGroup.cpp \
-	src/FloatValueGroup.h
+	src/FloatValueGroup.h \
+	src/timetypes.cpp \
+	src/timetypes.h
 	
+wdb_fastload_SOURCES += \
+	src/main.cpp
+	
+libfastload_a_SOURCES += $(SOURCE)

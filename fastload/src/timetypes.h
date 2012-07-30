@@ -1,5 +1,5 @@
 /*
- fastload
+ fastload 
 
  Copyright (C) 2012 met.no
 
@@ -26,41 +26,31 @@
  MA  02110-1301, USA
  */
 
-#ifndef TRANSLATEJOB_H_
-#define TRANSLATEJOB_H_
 
-#include "AbstractJob.h"
-#include <pqxx/transaction>
-#include <boost/shared_ptr.hpp>
-#include <map>
+#ifndef TIMETYPES_H_
+#define TIMETYPES_H_
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/posix_time_duration.hpp>
+
 
 namespace fastload
 {
-class DatabaseTranslator;
+
+typedef boost::gregorian::date Date;
+typedef boost::posix_time::ptime Time;
+typedef boost::posix_time::time_duration Duration;
+
+extern const Time infinity;
+extern const Time negativeInfinity;
+
+/// Parse a time string, as required in input files
+Time parseTime(std::string time);
 
 
-class TranslateJob : public AbstractJob
-{
-public:
-	TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue);
-	~TranslateJob();
+}
 
-protected:
-	virtual void run();
 
-private:
-	virtual std::string getCopyStatement_(const std::string & what, const std::string & dataprovider);
 
-	enum WdbInternalTableStructure
-	{
-		Old, New
-	};
-	WdbInternalTableStructure tableStructure_();
 
-	DataQueue::Ptr readQueue_;
-
-	boost::shared_ptr<DatabaseTranslator> translator_;
-};
-
-} /* namespace fastload */
-#endif /* TRANSLATEJOB_H_ */
+#endif /* TIMETYPES_H_ */

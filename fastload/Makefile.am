@@ -1,11 +1,17 @@
 ACLOCAL_AMFLAGS = -I m4
 
+noinst_LIBRARIES = libfastload.a
+libfastload_a_SOURCES =
+libfastload_a_CPPFLAGS = $(wdb_fastload_CPPFLAGS)
+
+
 bin_PROGRAMS = wdb-fastload
 
 wdb_fastload_SOURCES =
 
 wdb_fastload_CPPFLAGS = $(wdb_CFLAGS)
-wdb_fastload_LDADD = $(wdb_LIBS) $(BOOST_THREAD_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_DATE_TIME_LIB) -lpq
+wdb_fastload_LDADD = libfastload.a $(wdb_LIBS) $(BOOST_THREAD_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_DATE_TIME_LIB) -lpq
+
 
 man1_MANS = wdb-fastload.man
 
@@ -14,6 +20,7 @@ wdb-fastload.man:	wdb-fastload
 
 
 include src/fastload.mk
+include test/fastload.mk
 
 EXTRA_DIST = example/example.dat
 CLEANFILES = $(man1_MANS)

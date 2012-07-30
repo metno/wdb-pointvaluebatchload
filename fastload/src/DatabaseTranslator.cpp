@@ -29,20 +29,24 @@
 #include "DatabaseTranslator.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <algorithm>
 
 namespace fastload
 {
 
 DatabaseTranslator::DatabaseTranslator(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace) :
-		connection_(pqConnectString), wciUser_(wciUser), nameSpace_(nameSpace)
+		connection_(pqConnectString), transaction_(0), wciUser_(wciUser), nameSpace_(nameSpace)
 {
-	transaction_ = new pqxx::work(connection_);
+	connection_.set_variable("timezone", "UTC");
 }
 
 DatabaseTranslator::~DatabaseTranslator()
 {
-	transaction_->commit();
-	delete transaction_;
+	if ( transaction_ )
+	{
+		transaction_->commit();
+		delete transaction_;
+	}
 }
 
 std::string DatabaseTranslator::updateDataprovider(const std::string & dataproviderSpec)
@@ -58,10 +62,10 @@ std::string DatabaseTranslator::updateDataprovider(const std::string & dataprovi
 	if ( elements.size() == 2 or not nameSpace_.empty() )
 	{
 		std::string ns = nameSpace_.empty() ? elements[1] : nameSpace_;
-		exec("SELECT wci.begin('" + transaction_->esc(wciUser_) + "', " + transaction_->esc(ns) + ")");
+		exec("SELECT wci.begin('" + transaction().esc(wciUser_) + "', " + transaction().esc(ns) + ")");
 	}
 	else // if ( elements.size() == 1 )
-		exec("SELECT wci.begin('" + transaction_->esc(wciUser_) + "')");
+		exec("SELECT wci.begin('" + transaction().esc(wciUser_) + "')");
 
 	return dataprovider;
 }
@@ -72,7 +76,7 @@ long long DatabaseTranslator::dataproviderid(const std::string & dataprovidernam
 	if ( ! dataproviderid )
 	{
 		std::ostringstream query;
-		query << "SELECT wci_int.idfromdataprovider('" << transaction_->esc(dataprovidername) << "')";
+		query << "SELECT wci_int.idfromdataprovider('" << transaction().esc(dataprovidername) << "')";
 		pqxx::result result = exec(query.str());
 		if ( result.empty() )
 			throw std::runtime_error("Not a recognized dataprovider: " + dataprovidername);
@@ -81,19 +85,82 @@ long long DatabaseTranslator::dataproviderid(const std::string & dataprovidernam
 	return dataproviderid;
 }
 
-long long DatabaseTranslator::placeid(const std::string & placename)
+namespace
 {
-	long long & placeid = placeids_[placename];
-	if ( ! placeid )
+	inline Duration duration(long long seconds)
+	{
+		return Duration(seconds / 3600, 0, seconds % 3600);
+	}
+	std::string timeQuery(const std::string & rowName)
+	{
+		return "to_char(" + rowName + ", 'YYYY-MM-DD HH24:MI:SS')";
+	}
+	Time parseTime(const pqxx::result::field & field, const Time & defaultTime)
+	{
+		if ( field.is_null() )
+			return defaultTime;
+		return boost::posix_time::time_from_string(field.as<std::string>());
+	}
+}
+long long DatabaseTranslator::placeid(const std::string & placename, const Time & time)
+{
+	std::map<Time, long long> & placeid = placeids_[placename];
+	if ( placeid.empty() )
 	{
 		std::ostringstream query;
-		query << "SELECT placeid FROM wci.getplacedefinition('" << transaction_->esc(placename) << "')";
+		query << "SELECT pv.placeid, " << timeQuery("pv.placenamevalidfrom") << ", " << timeQuery("pv.placenamevalidto") << " FROM wci_int.placedefinition_mv pv, wci_int.getsessiondata() s WHERE pv.placename='1005' AND pv.placenamespaceid = s.placenamespaceid";
+		//query << "SELECT placeid, " << timeQuery("placenamevalidfrom") << ", " << timeQuery("placenamevalidto") << " FROM wci.getplacedefinition('" << transaction().esc(placename) << "') ORDER BY placenamevalidfrom";
+		std::cout << query.str() << std::endl;
+
 		pqxx::result result = exec(query.str());
-		if ( result.empty() )
-			throw std::runtime_error("Not a recognized placename: " + placename);
-		placeid = result[0][0].as<long long>();
+		//if ( result.empty() )
+		//	throw std::runtime_error("Not a recognized placename: " + placename);
+
+		//placeid[negativeInfinity] = -1;
+		for ( pqxx::result::const_iterator it = result.begin(); it != result.end(); ++ it )
+		{
+			static const Time epoch(Date(1970, 1, 1));
+			Time from = parseTime((*it)[1], negativeInfinity);
+			Time to = parseTime((*it)[2], infinity);
+
+			placeid[from] = (*it)[0].as<long long>();
+			placeid[to] = -1;
+		}
+
+		std::cout << "Times:" << std::endl;
+		for ( std::map<Time, long long>::const_iterator it = placeid.begin(); it != placeid.end(); ++ it )
+			std::cout << '\t' << it->first << " = " << it->second << std::endl;
+
 	}
-	return placeid;
+	//std::map<Time, long long>::const_iterator find = placeid.lower_bound(time);
+	std::map<Time, long long>::const_reverse_iterator find = placeid.rbegin();
+	while ( find != placeid.rend() )
+	{
+		if ( find->first <= time)
+			break;
+		++ find;
+	}
+
+	if ( find == placeid.rend() or find->second < 0 )
+		throw std::runtime_error("Unable to find a valid point for placename <" + placename + "> at time " + to_simple_string(time));
+
+	std::cout << "Returning placeid " << find->second << " for time " << time << std::endl;
+
+	return find->second;
+
+
+
+//	long long & placeid = placeids_[placename];
+//	if ( ! placeid )
+//	{
+//		std::ostringstream query;
+//		query << "SELECT placeid, placenamevalidfrom, placenamevalidto FROM wci.getplacedefinition('" << transaction().esc(placename) << "')";
+//		pqxx::result result = exec(query.str());
+//		if ( result.empty() )
+//			throw std::runtime_error("Not a recognized placename: " + placename);
+//		placeid = result[0][0].as<long long>();
+//	}
+//	return placeid;
 }
 
 int DatabaseTranslator::valueparameterid(const std::string & parametername)
@@ -102,7 +169,7 @@ int DatabaseTranslator::valueparameterid(const std::string & parametername)
 	if ( ! paramid )
 	{
 		std::ostringstream query;
-		query << "SELECT wci_int.getvalueparameterid(wci_int.normalizeparameter('" << transaction_->esc(parametername) << "'))";
+		query << "SELECT wci_int.getvalueparameterid(wci_int.normalizeparameter('" << transaction().esc(parametername) << "'))";
 		pqxx::result result = exec(query.str());
 		if ( result.empty() )
 			throw std::runtime_error("Not a recognized value parameter: " + parametername);
@@ -117,7 +184,7 @@ int DatabaseTranslator::levelparameterid(const std::string & parametername)
 	if ( ! paramid )
 	{
 		std::ostringstream query;
-		query << "SELECT wci_int.getlevelparameterid(wci_int.normalizelevelparameter('" << transaction_->esc(parametername) << "'))";
+		query << "SELECT wci_int.getlevelparameterid(wci_int.normalizelevelparameter('" << transaction().esc(parametername) << "'))";
 		pqxx::result result = exec(query.str());
 		if ( result.empty() )
 			throw std::runtime_error("Not a recognized level parameter: " + parametername);
@@ -138,6 +205,7 @@ std::string DatabaseTranslator::now()
 
 int DatabaseTranslator::getValueGroup(const std::string & dataprovidername,
 		const std::string & placename,
+		const Time & referenceTime,
 		const Duration & validTimeFrom,
 		const Duration & validTimeTo,
 		const std::string & valueparametername,
@@ -147,9 +215,9 @@ int DatabaseTranslator::getValueGroup(const std::string & dataprovidername,
 		int dataversion)
 {
 	long long dataproviderId = dataproviderid(dataprovidername);
-	long long placeId = placeid(placename);
-	std::string validfrom = transaction_->esc(to_simple_string(validTimeFrom));
-	std::string validto = transaction_->esc(to_simple_string(validTimeTo));
+	long long placeId = placeid(placename, referenceTime);
+	std::string validfrom = transaction().esc(to_simple_string(validTimeFrom));
+	std::string validto = transaction().esc(to_simple_string(validTimeTo));
 	int valueparameterId = valueparameterid(valueparametername);
 	int levelparameterId = levelparameterid(levelparametername);
 
@@ -196,10 +264,17 @@ std::string DatabaseTranslator::wciVersion()
 	return wciVersion_;
 }
 
+pqxx::work & DatabaseTranslator::transaction()
+{
+	if ( ! transaction_ )
+		transaction_ = new pqxx::work(connection_);
+	return * transaction_;
+}
+
 pqxx::result DatabaseTranslator::exec(const std::string & query)
 {
 	//std::clog << query << std::endl;
-	return transaction_->exec(query);
+	return transaction().exec(query);
 }
 
 } /* namespace fastload */

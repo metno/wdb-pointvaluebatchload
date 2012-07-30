@@ -30,10 +30,10 @@
 #define DATABASETRANSLATOR_H_
 
 #include "FloatValueGroup.h"
+#include "timetypes.h"
 #include <pqxx/connection.hxx>
 #include <pqxx/transaction>
-#include <boost/date_time/posix_time/posix_time_duration.hpp>
-#include <string>
+#include <boost/noncopyable.hpp>
 #include <map>
 #include <set>
 
@@ -41,7 +41,7 @@
 namespace fastload
 {
 
-class DatabaseTranslator
+class DatabaseTranslator : boost::noncopyable
 {
 public:
 	DatabaseTranslator(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace);
@@ -50,14 +50,14 @@ public:
 	std::string updateDataprovider(const std::string & dataproviderSpec);
 
 	long long dataproviderid(const std::string & dataprovidername);
-	long long placeid(const std::string & placename);
+	long long placeid(const std::string & placename, const Time & time);
 	int valueparameterid(const std::string & parametername);
 	int levelparameterid(const std::string & parametername);
 	std::string now();
-	typedef boost::posix_time::time_duration Duration;
 
 	int getValueGroup(const std::string & dataprovidername,
 			const std::string & placename,
+			const Time & referenceTime,
 			const Duration & validTimeFrom,
 			const Duration & validTimeTo,
 			const std::string & valueparametername,
@@ -69,6 +69,8 @@ public:
 	std::string wciVersion();
 
 private:
+	pqxx::work & transaction();
+
 	pqxx::result exec(const std::string & query);
 
 	pqxx::connection connection_;
@@ -77,7 +79,7 @@ private:
 	std::string nameSpace_;
 
 	std::map<std::string, long long> dataproviders_;
-	std::map<std::string, long long> placeids_;
+	std::map<std::string, std::map<Time, long long> > placeids_;
 	std::map<std::string, int> valueparameterids_;
 	std::map<std::string, int> levelparameterids_;
 	std::string timeNow_;
