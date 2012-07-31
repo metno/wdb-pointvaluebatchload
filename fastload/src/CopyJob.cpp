@@ -27,7 +27,6 @@
  */
 
 #include "CopyJob.h"
-#include <iostream>
 
 namespace fastload
 {

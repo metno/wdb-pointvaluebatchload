@@ -27,6 +27,7 @@
  */
 
 #include "DatabaseTranslator.h"
+#include <log4cpp/Category.hh>
 #include <boost/algorithm/string.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <algorithm>
@@ -104,7 +105,7 @@ long long DatabaseTranslator::placeid(const std::string & placename, const Time 
 	if ( placeid.empty() )
 	{
 		std::ostringstream query;
-		query << "SELECT pv.placeid, " << timeQuery("pv.placenamevalidfrom") << ", " << timeQuery("pv.placenamevalidto") << " FROM wci_int.placedefinition_mv pv, wci_int.getsessiondata() s WHERE pv.placename='1005' AND pv.placenamespaceid = s.placenamespaceid";
+		query << "SELECT pv.placeid, " << timeQuery("pv.placenamevalidfrom") << ", " << timeQuery("pv.placenamevalidto") << " FROM wci_int.placedefinition_mv pv, wci_int.getsessiondata() s WHERE pv.placename='" << transaction().esc(placename) << "' AND pv.placenamespaceid = s.placenamespaceid";
 		//query << "SELECT placeid, " << timeQuery("placenamevalidfrom") << ", " << timeQuery("placenamevalidto") << " FROM wci.getplacedefinition('" << transaction().esc(placename) << "') ORDER BY placenamevalidfrom";
 
 		pqxx::result result = exec(query.str());
@@ -271,7 +272,9 @@ pqxx::work & DatabaseTranslator::transaction()
 
 pqxx::result DatabaseTranslator::exec(const std::string & query)
 {
-	//std::clog << query << std::endl;
+	log4cpp::Category & log = log4cpp::Category::getInstance("wdb.query");
+	log.debug(query);
+
 	return transaction().exec(query);
 }
 
