@@ -36,11 +36,13 @@
 namespace fastload
 {
 
-TranslateJob::TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue) :
+TranslateJob::TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue, bool forwardWrites) :
 		AbstractJob(writeQueue),
 		readQueue_(readQueue),
 		translator_(new DatabaseTranslator(pqConnectString, wciUser, nameSpace))
 {
+	if ( not forwardWrites )
+		queue_->done();
 }
 
 TranslateJob::~TranslateJob()
@@ -83,14 +85,6 @@ void TranslateJob::run()
 		throw;
 	}
 	queue_->done();
-}
-
-namespace
-{
-int getValueGroup()
-{
-	return 0;
-}
 }
 
 std::string TranslateJob::getCopyStatement_(const std::string & what, const std::string & dataprovider)

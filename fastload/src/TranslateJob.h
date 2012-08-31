@@ -42,7 +42,7 @@ class DatabaseTranslator;
 class TranslateJob : public AbstractJob
 {
 public:
-	TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue);
+	TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue, bool forwardWrites = true);
 	~TranslateJob();
 
 protected:

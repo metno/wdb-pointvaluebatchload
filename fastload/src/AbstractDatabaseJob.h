@@ -42,8 +42,10 @@ public:
 	AbstractDatabaseJob(const std::string & pqConnectString, DataQueue::Ptr que);
 	virtual ~AbstractDatabaseJob();
 
+	typedef boost::shared_ptr<PGconn> Connection;
 protected:
-	virtual void performQueries(PGconn * connection) =0;
+
+	virtual void performQueries(Connection connection) =0;
 
 	void checkResult(int what, int expected, const std::string & message) const;
 	void checkResult(ExecStatusType est, PGresult * result) const;

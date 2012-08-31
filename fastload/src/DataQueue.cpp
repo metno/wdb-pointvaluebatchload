@@ -54,7 +54,7 @@ bool DataQueue::get(DataQueue::Data & out)
 	//log.debugStream() << "size: " << que_.size() << " (total: " << extracts_ << ")";
 
 	if ( status_ == Shutdown )
-		throw std::runtime_error(queName_ + " queue was terminated");
+		throw std::runtime_error(__func__ + std::string(": ") + queName_ + " queue was terminated");
 
 	while ( que_.empty() )
 	{
@@ -66,7 +66,7 @@ bool DataQueue::get(DataQueue::Data & out)
 		//log.debugStream() << "get done waiting";
 
 		if ( status_ == Shutdown )
-			throw std::runtime_error(queName_ + " queue was terminated");
+			throw std::runtime_error(__func__ + std::string(": ") + queName_ + " queue was terminated");
 
 	}
 
@@ -88,7 +88,9 @@ void DataQueue::put(const DataQueue::Data & element)
 	boost::unique_lock<boost::mutex> lock(mutex_);
 
 	if ( status_ == Shutdown )
-		throw std::runtime_error(queName_ + " queue was terminated");
+		throw std::runtime_error(__func__ + std::string(": ") + queName_ + " queue was terminated");
+	else if ( status_ == Done )
+		return;
 
 	if ( maxQueSize_ and que_.size() >= maxQueSize_ )
 	{

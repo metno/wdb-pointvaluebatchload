@@ -44,12 +44,14 @@ public:
 	~CopyJob();
 
 protected:
-	virtual void performQueries(PGconn * connection);
+	virtual void performQueries(Connection connection);
 
 private:
 	//void beginCopy(PGconn * connection);
-	void copyRow(PGconn * connection, const std::string & row);
-	void endCopy(PGconn * connection);
+	void copyRow(const std::string & row);
+	void endCopy();
+
+	Connection copyConnection_;
 };
 
 }

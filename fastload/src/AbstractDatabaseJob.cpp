@@ -33,10 +33,9 @@ namespace fastload
 {
 namespace
 {
-typedef boost::shared_ptr<PGconn> Connection;
-Connection connect(const char * conninfo)
+AbstractDatabaseJob::Connection connect(const char * conninfo)
 {
-	return Connection(PQconnectdb(conninfo), PQfinish);
+	return AbstractDatabaseJob::Connection(PQconnectdb(conninfo), PQfinish);
 }
 }
 
@@ -60,7 +59,7 @@ void AbstractDatabaseJob::run()
 	if ( PQresultStatus(result) != PGRES_COMMAND_OK )
 		throw std::runtime_error(PQresultErrorMessage(result));
 
-	performQueries(connection.get());
+	performQueries(connection);
 }
 
 void AbstractDatabaseJob::checkResult(int what, int expected, const std::string & message) const

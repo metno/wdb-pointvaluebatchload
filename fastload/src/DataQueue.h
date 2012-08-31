@@ -52,6 +52,9 @@ public:
 	bool get(Data & out);
 	void put(const Data & element);
 
+	/**
+	 * Warning: Calling this will cause put() to become a noop.
+	 */
 	void done();
 
 	void shutdown();

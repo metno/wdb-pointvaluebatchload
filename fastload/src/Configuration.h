@@ -52,6 +52,8 @@ public:
 	const std::string & logFile() const { return logFile_; }
 	log4cpp::Priority::Value logLevel() const;
 
+	bool onlyCreateCroups() const { return onlyCreateCroups_; }
+
 	std::ostream & printVersion(std::ostream & stream);
 	std::ostream & printHelp(std::ostream & stream);
 	std::ostream & printFormatHelp(std::ostream & stream);
@@ -71,6 +73,8 @@ private:
 
 	std::string logFile_;
 	int logLevel_;
+
+	bool onlyCreateCroups_;
 };
 
 } /* namespace fastload */

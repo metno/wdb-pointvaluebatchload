@@ -145,7 +145,7 @@ std::ostream & Configuration::printFormatHelp(std::ostream & s)
 					"  * dataversion\n"
 					"  * maxdataversion\n"
 					"  \n"
-					"Note that for all times, it is neccessary to explicitly specify tile zone. \n"
+					"Note that for all times, it is neccessary to explicitly specify time zone. \n"
 					"Otherwise you may experience some problems with loading.\n";
 
 	return s;
@@ -187,8 +187,12 @@ boost::program_options::options_description Configuration::shownOptions_()
 	wci.add_options()
 	("namespace", value(& nameSpace_), "Use the given wdb namespaces, instead of what is specified in the given file(s)");
 
+	options_description loading( "Loading" );
+	loading.add_options()
+	("only-groups", bool_switch(& onlyCreateCroups_), "Do not attempt to load regular data. Instead only create floatvalue groups for the data");
+
 	boost::program_options::options_description shownOptions("Allowed options");
-	shownOptions.add(general).add(database).add(logging).add(wci);
+	shownOptions.add(general).add(database).add(logging).add(wci).add(loading);
 
 	return shownOptions;
 }
