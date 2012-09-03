@@ -76,58 +76,66 @@ log4cpp::Appender * getLogAppender(const fastload::Configuration & configuration
 
 int main(int argc, char ** argv)
 {
-	fastload::Configuration configuration(argc, argv);
-
-	log4cpp::Appender * appender(getLogAppender(configuration));
-	log4cpp::Category & log = log4cpp::Category::getInstance("wdb");
-	log.addAppender(appender);
-	log.setPriority(configuration.logLevel());
-
-	fastload::DataQueue::Ptr rawQue(new fastload::DataQueue(50000, "raw"));
-	fastload::DataQueue::Ptr translatedQue(new fastload::DataQueue(1000, "translated"));
-
-	fastload::TranslateJob translateJob(configuration.pqConnect(), configuration.wciUser(), configuration.nameSpace(), rawQue, translatedQue, not configuration.onlyCreateCroups());
-	boost::thread translateThread(translateJob);
-
-	fastload::old::CopyJob copyJob(configuration.pqConnect(), translatedQue);
-	boost::thread copyThread(copyJob);
-
 	try
 	{
-		for ( std::vector<std::string>::const_iterator it = configuration.file().begin(); it != configuration.file().end(); ++ it )
+		fastload::Configuration configuration(argc, argv);
+
+		log4cpp::Appender * appender(getLogAppender(configuration));
+		log4cpp::Category & log = log4cpp::Category::getInstance("wdb");
+		log.addAppender(appender);
+		log.setPriority(configuration.logLevel());
+
+		fastload::DataQueue::Ptr rawQue(new fastload::DataQueue(50000, "raw"));
+		fastload::DataQueue::Ptr translatedQue(new fastload::DataQueue(1000, "translated"));
+
+		fastload::TranslateJob translateJob(configuration.pqConnect(), configuration.wciUser(), configuration.nameSpace(), rawQue, translatedQue, not configuration.onlyCreateCroups());
+		boost::thread translateThread(translateJob);
+
+		fastload::old::CopyJob copyJob(configuration.pqConnect(), translatedQue);
+		boost::thread copyThread(copyJob);
+
+		try
 		{
-			if ( * it == "-" )
-				copyData(std::cin, * rawQue);
-			else
+			for ( std::vector<std::string>::const_iterator it = configuration.file().begin(); it != configuration.file().end(); ++ it )
 			{
-				std::ifstream s(it->c_str());
-				if ( ! s.good() )
+				if ( * it == "-" )
+					copyData(std::cin, * rawQue);
+				else
 				{
-					log.fatalStream() << "Unable to open file " << * it;
-					exit(1);
+					std::ifstream s(it->c_str());
+					if ( ! s.good() )
+					{
+						log.fatalStream() << "Unable to open file " << * it;
+						exit(1);
+					}
+					copyData(s, * rawQue);
 				}
-				copyData(s, * rawQue);
 			}
+			rawQue->done();
 		}
-		rawQue->done();
+		catch ( std::exception & e )
+		{
+			// improved error logging
+			checkForErrors(translateJob);
+			checkForErrors(copyJob);
+
+			log.fatal(e.what());
+			return 1;
+		}
+
+		const boost::posix_time::time_duration duration(0,0,1);
+		while ( translateJob.status() != fastload::AbstractJob::Done or copyJob.status() != fastload::AbstractJob::Done )
+		{
+			checkForErrors(translateJob);
+			checkForErrors(copyJob);
+			boost::this_thread::sleep(duration);
+		}
+
+		log.infoStream() << "COPY " << translatedQue->callsToGet();
 	}
 	catch ( std::exception & e )
 	{
-		// improved error logging
-		checkForErrors(translateJob);
-		checkForErrors(copyJob);
-
-		log.fatal(e.what());
+		std::clog << e.what() << std::endl;
 		return 1;
 	}
-
-	const boost::posix_time::time_duration duration(0,0,1);
-	while ( translateJob.status() != fastload::AbstractJob::Done or copyJob.status() != fastload::AbstractJob::Done )
-	{
-		checkForErrors(translateJob);
-		checkForErrors(copyJob);
-		boost::this_thread::sleep(duration);
-	}
-
-	log.infoStream() << "COPY " << translatedQue->callsToGet();
 }
