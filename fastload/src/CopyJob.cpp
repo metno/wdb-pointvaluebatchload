@@ -93,10 +93,14 @@ void CopyJob::endCopy()
 void CopyJob::performQueries(CopyJob::Connection connection)
 {
 	endCopy();
-	copyConnection_ = connection;
 	std::string data;
-	while ( queue_->get(data) )
+	if ( queue_->get(data) )
+	{
+		copyConnection_ = connection;
 		copyRow(data);
+		while ( queue_->get(data) )
+			copyRow(data);
+	}
 }
 
 }
