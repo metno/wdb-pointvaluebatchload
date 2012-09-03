@@ -36,11 +36,15 @@ namespace fastload
 namespace old
 {
 
-
+/**
+ * Sends sql COPY statements, read from the given queue, to a database. The
+ * sql COPY statement to be used is expected to be delivered first to the
+ * queue.
+ */
 class CopyJob : public AbstractDatabaseJob
 {
 public:
-	CopyJob(const std::string & pqConnectString, DataQueue::Ptr que);
+	CopyJob(const std::string & pqConnectString, DataQueue::Ptr queue);
 	~CopyJob();
 
 protected:

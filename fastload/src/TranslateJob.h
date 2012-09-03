@@ -39,27 +39,41 @@ namespace fastload
 class DatabaseTranslator;
 
 
+/**
+ * Translates fastload's input format into COPY statements for feeding into a
+ * wdb database.
+ */
 class TranslateJob : public AbstractJob
 {
 public:
-	TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue, bool forwardWrites = true);
-	~TranslateJob();
+	virtual ~TranslateJob();
+
+	typedef boost::shared_ptr<TranslateJob> Ptr;
+
+	static Ptr get(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue, bool forwardWrites = true);
 
 protected:
 	virtual void run();
 
-private:
-	virtual std::string getCopyStatement_(const std::string & what, const std::string & dataprovider);
+	TranslateJob(DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue, boost::shared_ptr<DatabaseTranslator> translator, bool forwardWrites);
+	TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue, bool forwardWrites = true);
 
-	enum WdbInternalTableStructure
-	{
-		Old, New
-	};
-	WdbInternalTableStructure tableStructure_();
+	virtual std::string getCopyCommand() =0;
+	virtual std::string getCopyStatement(const std::string & what, const std::string & dataprovider) =0;
+
 
 	DataQueue::Ptr readQueue_;
-
 	boost::shared_ptr<DatabaseTranslator> translator_;
+
+private:
+//	std::string getNewCopyStatement_(const std::string & what, const std::string & dataprovider);
+//	std::string getOldCopyStatement_(const std::string & what, const std::string & dataprovider);
+//
+//	enum WdbInternalTableStructure
+//	{
+//		Old, New
+//	};
+//	WdbInternalTableStructure tableStructure_();
 };
 
 } /* namespace fastload */

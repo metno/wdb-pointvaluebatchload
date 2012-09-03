@@ -74,6 +74,28 @@ log4cpp::Appender * getLogAppender(const fastload::Configuration & configuration
 }
 
 
+/**
+ * converts a pointer to a function object into a proper function object
+ */
+template<typename T>
+class pointer_runner
+{
+public:
+	typedef boost::shared_ptr<T> value_type;
+
+	explicit pointer_runner(value_type toRun) :
+			toRun_(toRun)
+	{}
+
+	void operator() ()
+	{
+		(*toRun_)();
+	}
+private:
+	value_type toRun_;
+};
+
+
 int main(int argc, char ** argv)
 {
 	try
@@ -88,8 +110,8 @@ int main(int argc, char ** argv)
 		fastload::DataQueue::Ptr rawQue(new fastload::DataQueue(50000, "raw"));
 		fastload::DataQueue::Ptr translatedQue(new fastload::DataQueue(1000, "translated"));
 
-		fastload::TranslateJob translateJob(configuration.pqConnect(), configuration.wciUser(), configuration.nameSpace(), rawQue, translatedQue, not configuration.onlyCreateCroups());
-		boost::thread translateThread(translateJob);
+		fastload::TranslateJob::Ptr translateJob = fastload::TranslateJob::get(configuration.pqConnect(), configuration.wciUser(), configuration.nameSpace(), rawQue, translatedQue, not configuration.onlyCreateCroups());
+		boost::thread translateThread(pointer_runner<fastload::TranslateJob>(translateJob));
 
 		fastload::old::CopyJob copyJob(configuration.pqConnect(), translatedQue);
 		boost::thread copyThread(copyJob);
@@ -116,7 +138,7 @@ int main(int argc, char ** argv)
 		catch ( std::exception & e )
 		{
 			// improved error logging
-			checkForErrors(translateJob);
+			checkForErrors(* translateJob);
 			checkForErrors(copyJob);
 
 			log.fatal(e.what());
@@ -124,9 +146,9 @@ int main(int argc, char ** argv)
 		}
 
 		const boost::posix_time::time_duration duration(0,0,1);
-		while ( translateJob.status() != fastload::AbstractJob::Done or copyJob.status() != fastload::AbstractJob::Done )
+		while ( translateJob->status() != fastload::AbstractJob::Done or copyJob.status() != fastload::AbstractJob::Done )
 		{
-			checkForErrors(translateJob);
+			checkForErrors(* translateJob);
 			checkForErrors(copyJob);
 			boost::this_thread::sleep(duration);
 		}

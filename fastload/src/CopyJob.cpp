@@ -33,8 +33,8 @@ namespace fastload
 namespace old
 {
 
-CopyJob::CopyJob(const std::string & pqConnectString, DataQueue::Ptr que) :
-		AbstractDatabaseJob(pqConnectString, que)
+CopyJob::CopyJob(const std::string & pqConnectString, DataQueue::Ptr queue) :
+		AbstractDatabaseJob(pqConnectString, queue)
 {
 }
 

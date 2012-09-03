@@ -11,6 +11,10 @@ SOURCE = \
 	src/InputData.h \
 	src/TranslateJob.cpp \
 	src/TranslateJob.h \
+	src/OldStyleTranslateJob.cpp \
+	src/OldStyleTranslateJob.h \
+	src/NewStyleTranslateJob.cpp \
+	src/NewStyleTranslateJob.h \
 	src/DatabaseTranslator.cpp \
 	src/DatabaseTranslator.h \
 	src/CopyJob.cpp \
