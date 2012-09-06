@@ -243,6 +243,39 @@ int DatabaseTranslator::getValueGroup(const std::string & dataprovidername,
 	return find->second;
 }
 
+std::string DatabaseTranslator::getDataTableName(const Time & referenceTime)
+{
+	if ( destinationTables_.empty() )
+	{
+		pqxx::result result = exec("SELECT schemaname, tablename "
+				"FROM pg_catalog.pg_tables "
+				"WHERE schemaname='wdb_partition' AND tablename='floatvalueitem_partitions'");
+		if ( result.empty() )
+		{
+			TablePartition partition("", fastload::parseTime("-infinity"), fastload::parseTime("infinity"));
+			destinationTables_.push_back(partition);
+		}
+		else
+		{
+			result = exec("SELECT * FROM wdb_partition.floatvalueitem_partitions ORDER BY fromtime");
+			for ( pqxx::result::const_iterator it = result.begin(); it != result.end(); ++ it )
+			{
+				std::string tableName = (*it)[0].as<std::string>();
+				Time validFrom = fastload::parseTime((*it)[1].as<std::string>());
+				Time validTo = fastload::parseTime((*it)[2].as<std::string>());
+				TablePartition partition(tableName, validFrom, validTo);
+				destinationTables_.push_back(partition);
+			}
+		}
+	}
+
+	for ( std::vector<TablePartition>::const_reverse_iterator find = destinationTables_.rbegin(); find != destinationTables_.rend(); ++ find )
+		if ( find->validFrom <= referenceTime and referenceTime < find->validTo )
+			return find->tableName;
+
+	throw std::runtime_error("No partition available for time " + boost::posix_time::to_simple_string(referenceTime));
+}
+
 std::string DatabaseTranslator::wciVersion()
 {
 	if ( wciVersion_.empty() )

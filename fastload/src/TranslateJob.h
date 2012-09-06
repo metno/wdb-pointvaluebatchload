@@ -37,6 +37,7 @@
 namespace fastload
 {
 class DatabaseTranslator;
+class InputData;
 
 
 /**
@@ -58,22 +59,11 @@ protected:
 	TranslateJob(DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue, boost::shared_ptr<DatabaseTranslator> translator, bool forwardWrites);
 	TranslateJob(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue, bool forwardWrites = true);
 
-	virtual std::string getCopyCommand() =0;
-	virtual std::string getCopyStatement(const std::string & what, const std::string & dataprovider) =0;
-
+	virtual std::string getCopyQuery(const InputData & inputData) =0;
+	virtual std::string getCopyStatement(const InputData & inputData) =0;
 
 	DataQueue::Ptr readQueue_;
 	boost::shared_ptr<DatabaseTranslator> translator_;
-
-private:
-//	std::string getNewCopyStatement_(const std::string & what, const std::string & dataprovider);
-//	std::string getOldCopyStatement_(const std::string & what, const std::string & dataprovider);
-//
-//	enum WdbInternalTableStructure
-//	{
-//		Old, New
-//	};
-//	WdbInternalTableStructure tableStructure_();
 };
 
 } /* namespace fastload */

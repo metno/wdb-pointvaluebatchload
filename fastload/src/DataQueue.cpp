@@ -47,11 +47,11 @@ DataQueue::~DataQueue()
 
 bool DataQueue::get(DataQueue::Data & out)
 {
-//	log4cpp::Category & log = log4cpp::Category::getInstance( "wdb.fastload.DataQue.get." + queName_ );
+	log4cpp::Category & log = log4cpp::Category::getInstance( "wdb.fastload.DataQue.get." + queName_ );
 
 	boost::unique_lock<boost::mutex> lock(mutex_);
 
-	//log.debugStream() << "size: " << que_.size() << " (total: " << extracts_ << ")";
+	//log.debugStream() << queName_ << " size: " << que_.size() << " (total: " << extracts_ << ")";
 
 	if ( status_ == Shutdown )
 		throw std::runtime_error(__func__ + std::string(": ") + queName_ + " queue was terminated");
@@ -61,9 +61,9 @@ bool DataQueue::get(DataQueue::Data & out)
 		if ( status_ == Done )
 			return false;
 
-		//log.debugStream() << "get waiting";
+		log.debugStream() << queName_ << " get waiting";
 		condition_.wait(mutex_);
-		//log.debugStream() << "get done waiting";
+		log.debugStream() << queName_ << "get done waiting";
 
 		if ( status_ == Shutdown )
 			throw std::runtime_error(__func__ + std::string(": ") + queName_ + " queue was terminated");
@@ -83,7 +83,7 @@ bool DataQueue::get(DataQueue::Data & out)
 
 void DataQueue::put(const DataQueue::Data & element)
 {
-	//log4cpp::Category & log = log4cpp::Category::getInstance( "wdb.fastload.DataQue.put" + queName_ );
+	log4cpp::Category & log = log4cpp::Category::getInstance( "wdb.fastload.DataQue.put" + queName_ );
 
 	boost::unique_lock<boost::mutex> lock(mutex_);
 
@@ -94,13 +94,13 @@ void DataQueue::put(const DataQueue::Data & element)
 
 	if ( maxQueSize_ and que_.size() >= maxQueSize_ )
 	{
-		//log.debugStream() << "waiting (" << que_.size() << ")";
+		log.debugStream() << queName_ << " waiting (" << que_.size() << ")";
 		condition_.wait(mutex_);
-		//log.debugStream() << "put done waiting";
+		log.debugStream() << queName_ << " done waiting";
 	}
 
 	que_.push_back(element);
-	//log.debugStream() << "Size: " << que_.size();
+	//log.debugStream() << queName_ << " size: " << que_.size();
 	++ inserts_;
 	condition_.notify_one();
 }

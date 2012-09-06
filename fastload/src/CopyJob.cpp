@@ -57,6 +57,8 @@ CopyJob::~CopyJob()
 
 void CopyJob::copyRow(const std::string & row)
 {
+	//std::cout << row << std::endl;
+
 	if ( row[0] == 'C' )
 	{
 		if ( row.substr(0, 5) == "COPY " )

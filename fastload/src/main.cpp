@@ -111,7 +111,8 @@ int main(int argc, char ** argv)
 		fastload::DataQueue::Ptr translatedQue(new fastload::DataQueue(1000, "translated"));
 
 		fastload::TranslateJob::Ptr translateJob = fastload::TranslateJob::get(configuration.pqConnect(), configuration.wciUser(), configuration.nameSpace(), rawQue, translatedQue, not configuration.onlyCreateCroups());
-		boost::thread translateThread(pointer_runner<fastload::TranslateJob>(translateJob));
+		pointer_runner<fastload::TranslateJob> translateRunner(translateJob);
+		boost::thread translateThread(translateRunner);
 
 		fastload::old::CopyJob copyJob(configuration.pqConnect(), translatedQue);
 		boost::thread copyThread(copyJob);

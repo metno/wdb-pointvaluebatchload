@@ -57,6 +57,11 @@ Duration parseTimeZone(const std::string & timezone)
 
 Time parseTime(std::string s)
 {
+	if ( s == "-infinity" )
+		return Time(boost::posix_time::neg_infin);
+	if ( s == "infinity")
+		return Time(boost::posix_time::pos_infin);
+
 	if ( s.size() < 19 )
 		throw std::invalid_argument("invalid time specification");
 	s[10] = ' '; // In case 'T' was used as a separator

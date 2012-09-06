@@ -120,6 +120,21 @@ public:
 			int dataversion);
 
 	/**
+	 * If the database table is partitioned, get the name of the destination
+	 * table to store data into, bypassing any data reallocation triggers in
+	 * the database.
+	 *
+	 * If the database is not partitioned, return an empty string.
+	 *
+	 * This way of storing data is useful, since mixing triggers and COPY
+	 * statements seems to create some problems with entering new
+	 * floatvalue groups into the database.
+	 *
+	 * This will not work for paritioned old-style databases.
+	 */
+	std::string getDataTableName(const Time & referenceTime);
+
+	/**
 	 * Get the version of the wdb database we are connected to. This gives the
 	 * same result as saying "SELECT wci.version()" in psql.
 	 */
@@ -130,6 +145,16 @@ public:
 	 * if getValueGroup(...) has been called.
 	 */
 	void commit();
+
+	struct TablePartition
+	{
+		TablePartition(const std::string & tableName, const Time & validFrom, const Time & validTo) :
+			tableName(tableName), validFrom(validFrom), validTo(validTo)
+		{}
+		std::string tableName;
+		Time validFrom;
+		Time validTo;
+	};
 
 private:
 	pqxx::work & transaction();
@@ -150,6 +175,9 @@ private:
 
 	std::map<FloatValueGroup, int> floatValueGroups_;
 	std::set<std::pair<long long, long long> > queriedDataprovidersAndPlaces_;
+
+
+	std::vector<TablePartition> destinationTables_;
 };
 
 } /* namespace fastload */
