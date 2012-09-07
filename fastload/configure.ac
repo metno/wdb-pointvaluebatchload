@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.65])
-AC_INIT(wdb-fastload, 1.0.2, [wdb@met.no])
+AC_INIT(wdb-fastload, 1.0.3, [wdb@met.no])
 
 AC_CONFIG_SRCDIR([src/AbstractDatabaseJob.cpp])
 AC_CONFIG_MACRO_DIR([m4])
