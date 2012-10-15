@@ -36,9 +36,19 @@
 namespace fastload
 {
 
+/**
+ * A parsed version of data from the expected input format to fastload
+ */
 class InputData
 {
 public:
+	/**
+	 * @param inputLine A single data line, as expected as "normal" input to
+	 *                  fastload
+	 * @param dataprovider The data provider name to use. This can be the same
+	 *                     name as given in fastload's dataprovider/namespace
+	 *                     entries
+	 */
 	InputData(const std::string & inputLine, const std::string dataprovider);
 	~InputData();
 

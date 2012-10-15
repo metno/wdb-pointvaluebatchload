@@ -34,6 +34,10 @@
 namespace fastload
 {
 
+/**
+ * Translating fastload input into wdb COPY statements, for wdb databases with
+ * versions 1.5.0 and above.
+ */
 class NewStyleTranslateJob: public fastload::TranslateJob
 {
 public:

@@ -43,6 +43,9 @@ class InputData;
 /**
  * Translates fastload's input format into COPY statements for feeding into a
  * wdb database.
+ *
+ * This is an abstract class use the static method get() to get a pointer to a
+ * concrete class.
  */
 class TranslateJob : public AbstractJob
 {
@@ -51,6 +54,9 @@ public:
 
 	typedef boost::shared_ptr<TranslateJob> Ptr;
 
+	/**
+	 * Get the correct TranslateJob implementation for the database you want to connect to.
+	 */
 	static Ptr get(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace, DataQueue::Ptr readQueue, DataQueue::Ptr writeQueue, bool forwardWrites = true);
 
 protected:

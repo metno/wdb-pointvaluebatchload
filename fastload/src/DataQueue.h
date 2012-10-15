@@ -39,9 +39,16 @@
 namespace fastload
 {
 
+/**
+ * A simple queue for strings.
+ */
 class DataQueue : boost::noncopyable
 {
 public:
+	/**
+	 * @param maxQueSize The maximum size of the queue at any given time
+	 * @param queName a name for debugging purposes
+	 */
 	explicit DataQueue(unsigned maxQueSize = 500000, const std::string & queName = std::string());
 	~DataQueue();
 
@@ -49,14 +56,47 @@ public:
 
 	typedef std::string Data;
 
+	/**
+	 * Extract a single element from the queue.
+	 *
+	 * If the queue is empty, block until at least one element has been added,
+	 * or someone calls done() or shutdown() on it.
+	 *
+	 * @param out Return data is placed here
+	 *
+	 * @throws std::runtime_error if attempting to get an element, and
+	 *         shutdown() has been called before an element was ready to
+	 *         return.
+	 *
+	 * @returns true if data was successfully stored in the output variable.
+	 *          false if no data was available, and done() has been called on
+	 *                the queue
+	 */
 	bool get(Data & out);
+
+	/**
+	 * Add an element to the queue, blocking if the maximum queue size has
+	 * been reached. Note that this method does nothing if done() has been
+	 * called.
+	 *
+	 * @param element The data to add to the queue
+	 *
+	 * @throws std::runtime_error if shutdown() has been called
+	 */
 	void put(const Data & element);
 
 	/**
-	 * Warning: Calling this will cause put() to become a noop.
+	 * Signal that the producer(s) have finished adding data to the queue, and
+	 * no more data will be added.
+	 *
+	 * @warning Calling this will cause put() to become a noop.
 	 */
 	void done();
 
+	/**
+	 * Cancel all actions on the queue, leaving it unusable. This may be used
+	 * in case a producer or consumer encounters an unrecoverable error.
+	 */
 	void shutdown();
 
 	unsigned callsToPut() const
@@ -69,10 +109,17 @@ public:
 		return extracts_;
 	}
 
+	/// queue status
 	enum Status
 	{
-		Ready, Done, Shutdown
+		Ready, //< Data may be inserted or extracted, possibly blocking
+		Done,  //< The producer(s) have notified that they are done producing data
+		Shutdown //< An error has occured, and this queue can not be used anymore
 	};
+
+	/**
+	 * Get access to the queue's current status.
+	 */
 	Status status() const
 	{
 		return status_;

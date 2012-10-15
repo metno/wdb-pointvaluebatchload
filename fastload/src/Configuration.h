@@ -37,25 +37,65 @@
 namespace fastload
 {
 
+/**
+ * Parsing and storing command-line options
+ */
 class Configuration
 {
 public:
 	Configuration(int argc, char ** argv);
 	~Configuration();
 
+	/**
+	 * File(s) to load
+	 */
 	const std::vector<std::string> & file() const { return file_; }
 
+	/**
+	 * Get the connection string to use with libpq to connect to a wdb database
+	 */
 	std::string pqConnect() const;
+
+	/**
+	 * user for wci.begin()
+	 */
 	const std::string & wciUser() const { return user_; }
+
+	/**
+	 * namespace for wci.begin(). Format is expected to be a single string,
+	 * like "88,88,88".
+	 */
 	const std::string & nameSpace() const { return nameSpace_; }
 
+	/**
+	 * Log output file
+	 */
 	const std::string & logFile() const { return logFile_; }
+
+	/**
+	 * Logging level
+	 */
 	log4cpp::Priority::Value logLevel() const;
 
+	/**
+	 * If true, we should only create floatvaluegroups, and not populate
+	 * floatvalueitem table.
+	 */
 	bool onlyCreateCroups() const { return onlyCreateCroups_; }
 
+	/**
+	 * Write program's version information to the given stream
+	 */
 	std::ostream & printVersion(std::ostream & stream);
+
+	/**
+	 * Write help information to the given stream
+	 */
 	std::ostream & printHelp(std::ostream & stream);
+
+	/**
+	 * Write help on data format to the given stream
+	 */
 	std::ostream & printFormatHelp(std::ostream & stream);
 
 private:
