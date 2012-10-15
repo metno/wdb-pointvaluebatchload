@@ -33,6 +33,7 @@
 #include "timetypes.h"
 #include <pqxx/connection.hxx>
 #include <pqxx/transaction>
+#include <pqxx/tablewriter.hxx>
 #include <boost/noncopyable.hpp>
 #include <map>
 #include <set>
@@ -161,10 +162,40 @@ private:
 
 	pqxx::result exec(const std::string & query);
 
+	//TODO. Refactoring!
+
+	/**
+	 * Database connection for querying wdb for whatever values we need.
+	 */
 	pqxx::connection connection_;
+
+	/**
+	 * Transaction associated with connection_ object
+	 */
 	pqxx::work * transaction_;
+
+	/**
+	 * wci user for wci.begin call
+	 */
 	std::string wciUser_;
+
+	/**
+	 * namespace sepcification for wci.begin call
+	 */
 	std::string nameSpace_;
+
+	/**
+	 * Database connection reserved for copying new floatvaluegroup entries
+	 */
+	pqxx::lazyconnection copyConnection_;
+	/**
+	 * Transaction associated with copyConnection_
+	 */
+	pqxx::work * copyTransaction_;
+	/**
+	 * writer for floatvaluegroup entries. Associated with copyTransaction_
+	 */
+	pqxx::tablewriter * tableWriter_;
 
 	std::map<std::string, long long> dataproviders_;
 	std::map<std::string, std::map<Time, long long> > placeids_;
@@ -173,7 +204,13 @@ private:
 	std::string timeNow_;
 	std::string wciVersion_;
 
+	/// List of floatvaluegroup entries, with their id numbers
 	std::map<FloatValueGroup, int> floatValueGroups_;
+
+	/**
+	 * List over queried data providers and place names. We use this to avoid
+	 * calling the database many times with the same query.
+	 */
 	std::set<std::pair<long long, long long> > queriedDataprovidersAndPlaces_;
 
 

@@ -30,11 +30,46 @@
 #define FLOATVALUEGROUP_H_
 
 #include <pqxx/result>
+#include <boost/flyweight.hpp>
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
 
 namespace fastload
 {
+namespace internal
+{
+/**
+ * FloatValueGroup data that is expected to vary very little over a single
+ * loading session. Allows the use of a flyweight pattern to reduce memory
+ * usage for huge data sets.
+ */
+struct ImmutableData
+{
+	ImmutableData(
+			long long dataproviderid,
+			long long placeid,
+			int validtimeindeterminatecode,
+			int valueparameterid,
+			int levelparameterid,
+			float levelfrom,
+			float levelto,
+			int levelindeterminatecode
+	);
 
+	long long dataproviderid_;
+	long long placeid_;
+	int validtimeindeterminatecode_;
+	int valueparameterid_;
+	int levelparameterid_;
+	float levelfrom_;
+	float levelto_;
+	int levelindeterminatecode_;
+};
+}
+
+
+/**
+ * In-memory representation of a floatvaluegroup entry in a wdb database.
+ */
 class FloatValueGroup
 {
 public:
@@ -56,16 +91,31 @@ public:
 	FloatValueGroup(const pqxx::result::tuple & queryResult);
 	~FloatValueGroup();
 
+	/**
+	 * Get the SQL statement to insert *this into a wdb database.
+	 *
+	 * @param valudeGroupId the value to use for valuegroupid in the database
+	 */
 	std::string databaseInsertStatement(int valueGroupId) const;
+
+	/**
+	 * Get string formatted versions of all elements in *this, in the order
+	 * expected by fastload's floatvalueitem COPY job.
+	 *
+	 * @param valudeGroupId the value to use for valuegroupid in the database
+	 * @returns a list of strings, with one element for each column in the
+	 *          database.
+	 */
+	std::vector<std::string> elements(int valueGroupId) const;
 
     long long dataproviderid() const
     {
-        return dataproviderid_;
+        return immutable_.get().dataproviderid_;
     }
 
     long long placeid() const
     {
-        return placeid_;
+        return immutable_.get().placeid_;
     }
 
     const Duration & validtimefrom() const
@@ -80,32 +130,32 @@ public:
 
     int validtimeindeterminatecode() const
     {
-        return validtimeindeterminatecode_;
+        return immutable_.get().validtimeindeterminatecode_;
     }
 
     int valueparameterid() const
     {
-        return valueparameterid_;
+        return immutable_.get().valueparameterid_;
     }
 
     int levelparameterid() const
     {
-        return levelparameterid_;
+        return immutable_.get().levelparameterid_;
     }
 
     float levelfrom() const
     {
-        return levelfrom_;
+        return immutable_.get().levelfrom_;
     }
 
     float levelto() const
     {
-        return levelto_;
+        return immutable_.get().levelto_;
     }
 
     int levelindeterminatecode() const
     {
-        return levelindeterminatecode_;
+        return immutable_.get().levelindeterminatecode_;
     }
 
     int dataversion() const
@@ -115,20 +165,20 @@ public:
 
 
 private:
-	 long long dataproviderid_;
-	 long long placeid_;
-	 Duration validtimefrom_;
-	 Duration validtimeto_;
-	 int validtimeindeterminatecode_;
-	 int valueparameterid_;
-	 int levelparameterid_;
-	 float levelfrom_;
-	 float levelto_;
-	 int levelindeterminatecode_;
-	 int dataversion_;
+
+    boost::flyweight<internal::ImmutableData> immutable_;
+	Duration validtimefrom_;
+	Duration validtimeto_;
+	int dataversion_;
 };
 
 bool operator < (const FloatValueGroup & a, const FloatValueGroup & b);
+
+namespace internal
+{
+bool operator == (const ImmutableData & a, const ImmutableData & b);
+std::size_t hash_value(const ImmutableData & id);
+}
 
 } /* namespace fastload */
 #endif /* FLOATVALUEGROUP_H_ */

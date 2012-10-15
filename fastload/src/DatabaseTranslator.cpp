@@ -36,14 +36,14 @@ namespace fastload
 {
 
 DatabaseTranslator::DatabaseTranslator(const std::string & pqConnectString, const std::string & wciUser, const std::string & nameSpace) :
-		connection_(pqConnectString), transaction_(0), wciUser_(wciUser), nameSpace_(nameSpace)
+		connection_(pqConnectString), transaction_(0), wciUser_(wciUser), nameSpace_(nameSpace),
+		copyConnection_(pqConnectString), copyTransaction_(0),	tableWriter_(0)
 {
 	connection_.set_variable("timezone", "UTC");
 }
 
 DatabaseTranslator::~DatabaseTranslator()
 {
-	commit();
 }
 
 std::string DatabaseTranslator::updateDataprovider(const std::string & dataproviderSpec)
@@ -234,8 +234,15 @@ int DatabaseTranslator::getValueGroup(const std::string & dataprovidername,
 			pqxx::result id = exec("SELECT nextval('wdb_int.floatvaluegroup_valuegroupid_seq')");
 			int valueGroupId = id.at(0).at(0).as<int>();
 
-			std::string insert = wantedValueGroup.databaseInsertStatement(valueGroupId);
-			exec(insert);
+			if ( ! tableWriter_ )
+			{
+				copyTransaction_ = new pqxx::work(copyConnection_);
+				tableWriter_ = new pqxx::tablewriter(* copyTransaction_, "wdb_int.floatvaluegroup");
+			}
+			tableWriter_->insert(wantedValueGroup.elements(valueGroupId));
+
+//			std::string insert = wantedValueGroup.databaseInsertStatement(valueGroupId);
+//			exec(insert);
 			floatValueGroups_[wantedValueGroup] = valueGroupId;
 			return valueGroupId;
 		}
@@ -288,6 +295,14 @@ std::string DatabaseTranslator::wciVersion()
 
 void DatabaseTranslator::commit()
 {
+	if ( copyTransaction_ )
+	{
+		tableWriter_->complete();
+		delete tableWriter_;
+		copyTransaction_->commit();
+		delete copyTransaction_;
+	}
+
 	if ( transaction_ )
 	{
 		transaction_->commit();

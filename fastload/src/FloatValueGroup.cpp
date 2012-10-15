@@ -51,31 +51,25 @@ FloatValueGroup::FloatValueGroup(
 			float levelto,
 			int levelindeterminatecode,
 			int dataversion) :
-		dataproviderid_(dataproviderid),
-		placeid_(placeid),
+		immutable_(internal::ImmutableData(dataproviderid, placeid, validtimeindeterminatecode, valueparameterid, levelparameterid, levelfrom, levelto, levelindeterminatecode)),
 		validtimefrom_(validtimefrom),
 		validtimeto_(validtimeto),
-		validtimeindeterminatecode_(validtimeindeterminatecode),
-		valueparameterid_(valueparameterid),
-		levelparameterid_(levelparameterid),
-		levelfrom_(levelfrom),
-		levelto_(levelto),
-		levelindeterminatecode_(levelindeterminatecode),
 		dataversion_(dataversion)
 {}
 
 
 FloatValueGroup::FloatValueGroup(const pqxx::result::tuple & queryResult) :
-		dataproviderid_(queryResult[1].as<long long>()),
-		placeid_(queryResult[2].as<long long>()),
+		immutable_(internal::ImmutableData(
+				queryResult[1].as<long long>(),
+				queryResult[2].as<long long>(),
+				queryResult[5].as<int>(),
+				queryResult[6].as<int>(),
+				queryResult[7].as<int>(),
+				queryResult[8].as<float>(),
+				queryResult[9].as<float>(),
+				queryResult[10].as<int>())),
 		validtimefrom_(getDuration(queryResult[3].as<std::string>())),
 		validtimeto_(getDuration(queryResult[4].as<std::string>())),
-		validtimeindeterminatecode_(queryResult[5].as<int>()),
-		valueparameterid_(queryResult[6].as<int>()),
-		levelparameterid_(queryResult[7].as<int>()),
-		levelfrom_(queryResult[8].as<float>()),
-		levelto_(queryResult[9].as<float>()),
-		levelindeterminatecode_(queryResult[10].as<int>()),
 		dataversion_(queryResult[11].as<int>())
 {
 }
@@ -99,19 +93,46 @@ std::string FloatValueGroup::databaseInsertStatement(int valueGroupId) const
 	std::ostringstream query;
 	query << "INSERT INTO wdb_int.floatvaluegroup VALUES (" <<
 			valueGroupId <<','<<
-			dataproviderid_ <<','<<
-			placeid_ <<','<<
+			dataproviderid() <<','<<
+			placeid() <<','<<
 			'\'' << format(validtimefrom_) << "',"<<
 			'\'' << format(validtimeto_) << "',"<<
 			0 <<','<<
-			valueparameterid_ <<','<<
-			levelparameterid_ <<','<<
-			levelfrom_ <<','<<
-			levelto_ <<','<<
+			valueparameterid() <<','<<
+			levelparameterid() <<','<<
+			levelfrom() <<','<<
+			levelto() <<','<<
 			0 <<','<<
 			dataversion_ << ")";
 
 	return query.str();
+}
+
+namespace
+{
+template<typename T>
+std::string str(T t)
+{
+	return boost::lexical_cast<std::string>(t);
+}
+}
+
+std::vector<std::string> FloatValueGroup::elements(int valueGroupId) const
+{
+	std::vector<std::string> ret;
+	ret.push_back(str(valueGroupId));
+	ret.push_back(str(dataproviderid()));
+	ret.push_back(str(placeid()));
+	ret.push_back(format(validtimefrom_));
+	ret.push_back(format(validtimeto_));
+	ret.push_back("0");
+	ret.push_back(str(valueparameterid()));
+	ret.push_back(str(levelparameterid()));
+	ret.push_back(str(levelfrom()));
+	ret.push_back(str(levelto()));
+	ret.push_back("0");
+	ret.push_back(str(dataversion()));
+	return ret;
 }
 
 bool operator < (const FloatValueGroup & a, const FloatValueGroup & b)
@@ -137,6 +158,57 @@ bool operator < (const FloatValueGroup & a, const FloatValueGroup & b)
 	if (a.levelindeterminatecode() != b.levelindeterminatecode())
 		return a.levelindeterminatecode() < b.levelindeterminatecode();
 	return a.dataversion() < b.dataversion();
+}
+
+namespace internal
+{
+ImmutableData::ImmutableData(
+		long long dataproviderid,
+		long long placeid,
+		int validtimeindeterminatecode,
+		int valueparameterid,
+		int levelparameterid,
+		float levelfrom,
+		float levelto,
+		int levelindeterminatecode) :
+				dataproviderid_(dataproviderid),
+				placeid_(placeid),
+				validtimeindeterminatecode_(validtimeindeterminatecode),
+				valueparameterid_(valueparameterid),
+				levelparameterid_(levelparameterid),
+				levelfrom_(levelfrom),
+				levelto_(levelto),
+				levelindeterminatecode_(levelindeterminatecode)
+{}
+
+bool operator == (const ImmutableData & a, const ImmutableData & b)
+{
+	return a.dataproviderid_ == b.dataproviderid_
+		and a.placeid_ == b.placeid_
+		and a.validtimeindeterminatecode_ == b.validtimeindeterminatecode_
+		and a.valueparameterid_ == b.valueparameterid_
+		and a.levelparameterid_ == b.levelparameterid_
+		and a.levelfrom_ == b.levelfrom_
+		and a.levelto_ == b.levelto_
+		and a.levelindeterminatecode_ == b.levelindeterminatecode_;
+}
+
+std::size_t hash_value(const ImmutableData & id)
+{
+	std::size_t seed = 0;
+
+	boost::hash_combine(seed, id.dataproviderid_);
+	boost::hash_combine(seed, id.placeid_);
+	boost::hash_combine(seed, id.validtimeindeterminatecode_);
+	boost::hash_combine(seed, id.valueparameterid_);
+	boost::hash_combine(seed, id.levelparameterid_);
+	boost::hash_combine(seed, id.levelfrom_);
+	boost::hash_combine(seed, id.levelto_);
+	boost::hash_combine(seed, id.levelindeterminatecode_);
+
+	return seed;
+}
+
 }
 
 } /* namespace fastload */
