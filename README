@@ -1,0 +1,6 @@
+Load point data into a wdb database.
+
+This program is meant for (relatively) fast loading of large amounts of data.
+This is done by reading input from stdin. You can get a description of the 
+input format by running the program with --help, or by viewing the man page.
+
