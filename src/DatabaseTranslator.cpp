@@ -234,15 +234,17 @@ int DatabaseTranslator::getValueGroup(const std::string & dataprovidername,
 			pqxx::result id = exec("SELECT nextval('wdb_int.floatvaluegroup_valuegroupid_seq')");
 			int valueGroupId = id.at(0).at(0).as<int>();
 
+#ifndef FLOATVALUEGROUP_INSERT_NO_COPY
 			if ( ! tableWriter_ )
 			{
 				copyTransaction_ = new pqxx::work(copyConnection_);
 				tableWriter_ = new pqxx::tablewriter(* copyTransaction_, "wdb_int.floatvaluegroup");
 			}
 			tableWriter_->insert(wantedValueGroup.elements(valueGroupId));
-
-//			std::string insert = wantedValueGroup.databaseInsertStatement(valueGroupId);
-//			exec(insert);
+#else
+			std::string insert = wantedValueGroup.databaseInsertStatement(valueGroupId);
+			exec(insert);
+#endif
 			floatValueGroups_[wantedValueGroup] = valueGroupId;
 			return valueGroupId;
 		}
