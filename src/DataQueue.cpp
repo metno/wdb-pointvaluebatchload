@@ -61,9 +61,9 @@ bool DataQueue::get(DataQueue::Data & out)
 		if ( status_ == Done )
 			return false;
 
-		log.debugStream() << queName_ << " get waiting";
+		//log.debugStream() << queName_ << " get waiting";
 		condition_.wait(mutex_);
-		log.debugStream() << queName_ << "get done waiting";
+		//log.debugStream() << queName_ << "get done waiting";
 
 		if ( status_ == Shutdown )
 			throw std::runtime_error(__func__ + std::string(": ") + queName_ + " queue was terminated");
@@ -94,9 +94,9 @@ void DataQueue::put(const DataQueue::Data & element)
 
 	if ( maxQueSize_ and que_.size() >= maxQueSize_ )
 	{
-		log.debugStream() << queName_ << " waiting (" << que_.size() << ")";
+		//log.debugStream() << queName_ << " waiting (" << que_.size() << ")";
 		condition_.wait(mutex_);
-		log.debugStream() << queName_ << " done waiting";
+		//log.debugStream() << queName_ << " done waiting";
 	}
 
 	que_.push_back(element);
