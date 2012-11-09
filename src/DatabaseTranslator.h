@@ -211,7 +211,7 @@ private:
 	 * List over queried data providers and place names. We use this to avoid
 	 * calling the database many times with the same query.
 	 */
-	std::set<std::pair<long long, long long> > queriedDataprovidersAndPlaces_;
+	std::set<std::pair<long long, long long> > queriedDataprovidersAndParameters_;
 
 
 	std::vector<TablePartition> destinationTables_;

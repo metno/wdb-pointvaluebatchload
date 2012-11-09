@@ -215,13 +215,13 @@ int DatabaseTranslator::getValueGroup(const std::string & dataprovidername,
 	std::map<FloatValueGroup, int>::const_iterator find = floatValueGroups_.find(wantedValueGroup);
 	if ( find == floatValueGroups_.end() ) // was not in memory, so we must contact database
 	{
-		if ( queriedDataprovidersAndPlaces_.find(std::make_pair(dataproviderId, placeId)) == queriedDataprovidersAndPlaces_.end() )
+		if ( queriedDataprovidersAndParameters_.find(std::make_pair(dataproviderId, valueparameterId)) == queriedDataprovidersAndParameters_.end() )
 		{
-			queriedDataprovidersAndPlaces_.insert(std::make_pair(dataproviderId, placeId));
+			queriedDataprovidersAndParameters_.insert(std::make_pair(dataproviderId, valueparameterId));
 			std::stringstream query;
 			query << "SELECT * FROM wdb_int.floatvaluegroup WHERE "
 					"dataproviderid=" << dataproviderId << " AND "
-					"placeid=" << placeId;
+					"valueparameterid=" << valueparameterId;
 			pqxx::result result = exec(query.str());
 
 			for ( pqxx::result::const_iterator it = result.begin(); it != result.end(); ++ it )
