@@ -100,26 +100,38 @@ int main(int argc, char ** argv)
 {
 	try
 	{
-		fastload::Configuration configuration(argc, argv);
+		boost::shared_ptr<fastload::Configuration> configuration;
+		try
+		{
+			configuration = boost::shared_ptr<fastload::Configuration>(new fastload::Configuration(argc, argv));
 
-		log4cpp::Appender * appender(getLogAppender(configuration));
+			log4cpp::Appender * appender(getLogAppender(* configuration));
+			log4cpp::Category & log = log4cpp::Category::getInstance("wdb");
+			log.addAppender(appender);
+			log.setPriority(configuration->logLevel());
+		}
+		catch ( std::exception & e )
+		{
+			// Failure to read configuration or set up logging will be written
+			// to stderr instead of logs:
+			std::clog << e.what() << std::endl;
+			return 1;
+		}
 		log4cpp::Category & log = log4cpp::Category::getInstance("wdb");
-		log.addAppender(appender);
-		log.setPriority(configuration.logLevel());
 
 		fastload::DataQueue::Ptr rawQue(new fastload::DataQueue(50000, "raw"));
 		fastload::DataQueue::Ptr translatedQue(new fastload::DataQueue(1000, "translated"));
 
-		fastload::TranslateJob::Ptr translateJob = fastload::TranslateJob::get(configuration.pqConnect(), configuration.wciUser(), configuration.nameSpace(), rawQue, translatedQue, not configuration.onlyCreateCroups());
+		fastload::TranslateJob::Ptr translateJob = fastload::TranslateJob::get(configuration->pqConnect(), configuration->wciUser(), configuration->nameSpace(), rawQue, translatedQue, not configuration->onlyCreateCroups());
 		pointer_runner<fastload::TranslateJob> translateRunner(translateJob);
 		boost::thread translateThread(translateRunner);
 
-		fastload::old::CopyJob copyJob(configuration.pqConnect(), translatedQue);
+		fastload::old::CopyJob copyJob(configuration->pqConnect(), translatedQue);
 		boost::thread copyThread(copyJob);
 
 		try
 		{
-			for ( std::vector<std::string>::const_iterator it = configuration.file().begin(); it != configuration.file().end(); ++ it )
+			for ( std::vector<std::string>::const_iterator it = configuration->file().begin(); it != configuration->file().end(); ++ it )
 			{
 				if ( * it == "-" )
 					copyData(std::cin, * rawQue);
@@ -158,7 +170,7 @@ int main(int argc, char ** argv)
 	}
 	catch ( std::exception & e )
 	{
-		std::clog << e.what() << std::endl;
+		log4cpp::Category::getInstance("wdb").fatal(e.what());
 		return 1;
 	}
 }
