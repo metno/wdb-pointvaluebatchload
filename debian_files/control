@@ -1,4 +1,4 @@
-Source: wdb-fastload
+Source: wdb-pointvaluebatchload
 Section: science
 Priority: extra
 Maintainer: WDB Group, Meteorologisk institutt <wdb@met.no>
@@ -10,10 +10,10 @@ Build-Depends: cdbs,
  libboost1.48-thread-dev | libboost-thread-dev (>= 1.40),
  libboost1.48-program-options-dev | libboost-program-options-dev (>= 1.40),
  libpqxx-dev (>= 2.6.9) | libpqxx3-dev
-Standards-Version: 3.9.1
+Standards-Version: 3.9.3
 
 
-Package: wdb-fastload
+Package: wdb-pointvaluebatchload-1.1
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: wdb

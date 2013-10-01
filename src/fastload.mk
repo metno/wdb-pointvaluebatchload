@@ -24,7 +24,7 @@ SOURCE = \
 	src/timetypes.cpp \
 	src/timetypes.h
 	
-wdb_fastload_SOURCES += \
+pointValueBatchLoad_SOURCES += \
 	src/main.cpp
 	
-libfastload_a_SOURCES += $(SOURCE)
+libpointvaluebatchload_a_SOURCES += $(SOURCE)

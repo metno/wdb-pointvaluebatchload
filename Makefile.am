@@ -1,21 +1,21 @@
 ACLOCAL_AMFLAGS = -I m4
 
-noinst_LIBRARIES = libfastload.a
-libfastload_a_SOURCES =
-libfastload_a_CPPFLAGS = $(wdb_fastload_CPPFLAGS)
+noinst_LIBRARIES = libpointvaluebatchload.a
+libpointvaluebatchload_a_SOURCES =
+libpointvaluebatchload_a_CPPFLAGS = $(wdb_pointvaluebatchload_CPPFLAGS)
 
 
-bin_PROGRAMS = wdb-fastload
+bin_PROGRAMS = pointValueBatchLoad
 
-wdb_fastload_SOURCES =
+pointValueBatchLoad_SOURCES =
 
-wdb_fastload_CPPFLAGS = $(wdb_CFLAGS)
-wdb_fastload_LDADD = libfastload.a $(wdb_LIBS) $(BOOST_THREAD_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_DATE_TIME_LIB) -lpq
+pointValueBatchLoad_CPPFLAGS = $(wdb_CFLAGS)
+pointValueBatchLoad_LDADD = libpointvaluebatchload.a $(wdb_LIBS) $(BOOST_THREAD_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_DATE_TIME_LIB) -lpq
 
 
-man1_MANS = wdb-fastload.man
+man1_MANS = pointValueBatchLoad.man
 
-wdb-fastload.man:	wdb-fastload
+pointValueBatchLoad.man: pointValueBatchLoad
 	help2man -N -n"Fast bulk loading of data into a wdb database" ./$< > $@
 
 

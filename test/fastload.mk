@@ -1,18 +1,18 @@
-TESTS = fastloadTest
+TESTS = pointValueBatchLoadTest
 
-check_PROGRAMS = fastloadTest
+check_PROGRAMS = pointValueBatchLoadTest
 
-fastloadTest_SOURCES = \
+pointValueBatchLoadTest_SOURCES = \
 	test/InputDataTest.cpp \
 	test/timetypetest.cpp
  
 
-fastloadTest_CPPFLAGS = \
+pointValueBatchLoadTest_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
-	$(wdb_fastload_CPPFLAGS) \
+	$(pointValueBatchLoad_CPPFLAGS) \
 	-I$(top_srcdir)/src \
 	$(BOOST_CPPFLAGS)
 
-fastloadTest_LDADD = \
-	$(wdb_fastload_LDADD) \
+pointValueBatchLoadTest_LDADD = \
+	$(pointValueBatchLoad_LDADD) \
 	$(BOOST_UNIT_TEST_FRAMEWORK_LIB)
