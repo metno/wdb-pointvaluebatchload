@@ -1,4 +1,4 @@
-wdb-pointvaluebatchload (1.1.0~rc1-1) lucid; urgency=low
+wdb-pointvaluebatchload (1.1.0-1) lucid; urgency=low
 
   * Updated configuration and debian files to conform with the WDB and
   Debian naming standards at the meteorological institute.
