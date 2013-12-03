@@ -17,6 +17,9 @@ Package: wdb-pointvaluebatchload-1.1
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: wdb
+Replaces: wdb-fastload
+Provides: wdb-pointvaluebatchload
+Conflicts: wdb-pointvaluebatchload
 Description: Fast bulk loading of data into a wdb database
  A specialized program for faster bulk loading of point data into a wdb 
  database.
